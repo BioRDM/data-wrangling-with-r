@@ -1,3 +1,6 @@
+# data folder as this one will be regenarted
+data
+
 # History files
 .Rhistory
 .Rapp.history
