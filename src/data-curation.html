@@ -711,6 +711,205 @@ head(renamed_data[1:5])</code></pre>
 
 fName = &#39;../data/renamed_data.csv&#39;
 write.csv(renamed_data, fName)</code></pre>
+<p>We first checked if the output directory exists, if not create it and
+then we saved the file.</p>
+</div>
+<div id="automatic-correction" class="section level3">
+<h3>Automatic correction</h3>
+<p>You may noticed that in mayority of the cases we just replaced . with
+_ in our new columm names. Segure it could be done in some automatic
+way.</p>
+<p>Indeed, it can be done using pattern matching with regular
+expressions. You will need to read more about regular expressions on
+your own, but here we will deal with replacing one character with
+other.</p>
+<p>The command to replace is called sub or gsub (the first one replace
+only the first appearance) and we pass it to it “what to replace”, “with
+what” and “Where”.</p>
+<p>So lets try it</p>
+<pre class="r"><code>sub(&quot;.&quot;,&quot;_&quot;,names(raw_data))</code></pre>
+<pre><code>##  [1] &quot;_BNAME&quot;                                
+##  [2] &quot;_ite&quot;                                  
+##  [3] &quot;_ate&quot;                                  
+##  [4] &quot;_ate.Analysed&quot;                         
+##  [5] &quot;_W.Sample.Number&quot;                      
+##  [6] &quot;_1.Description&quot;                        
+##  [7] &quot;_1.Reported.Value&quot;                     
+##  [8] &quot;_1.Sample.1&quot;                           
+##  [9] &quot;_1.Sample.2&quot;                           
+## [10] &quot;_1.Sample.3&quot;                           
+## [11] &quot;_alculated.Mean&quot;                       
+## [12] &quot;_tandard.Deviation&quot;                    
+## [13] &quot;_low..l.day.&quot;                          
+## [14] &quot;_mmonia..mg.l.&quot;                        
+## [15] &quot;_H.Value&quot;                              
+## [16] &quot;_odelled.Flow..l.day.&quot;                 
+## [17] &quot;_illion.Gene.Copies.Per.Person.per.Day&quot;
+## [18] &quot;_nalysis.Lab&quot;                          
+## [19] &quot;_.Row.Count.&quot;</code></pre>
+<p>OK that does not look good, it is cause ‘.’ means any character, so
+every starting letter was replaced with _. We need to “escape” the ‘.’,
+using \ which says it is just a . character</p>
+<pre class="r"><code>sub(&quot;\\.&quot;,&quot;_&quot;,names(raw_data))</code></pre>
+<pre><code>##  [1] &quot;HBNAME&quot;                                
+##  [2] &quot;Site&quot;                                  
+##  [3] &quot;Date&quot;                                  
+##  [4] &quot;Date_Analysed&quot;                         
+##  [5] &quot;SW_Sample.Number&quot;                      
+##  [6] &quot;N1_Description&quot;                        
+##  [7] &quot;N1_Reported.Value&quot;                     
+##  [8] &quot;N1_Sample.1&quot;                           
+##  [9] &quot;N1_Sample.2&quot;                           
+## [10] &quot;N1_Sample.3&quot;                           
+## [11] &quot;Calculated_Mean&quot;                       
+## [12] &quot;Standard_Deviation&quot;                    
+## [13] &quot;Flow_.l.day.&quot;                          
+## [14] &quot;Ammonia_.mg.l.&quot;                        
+## [15] &quot;pH_Value&quot;                              
+## [16] &quot;Modelled_Flow..l.day.&quot;                 
+## [17] &quot;Million_Gene.Copies.Per.Person.per.Day&quot;
+## [18] &quot;Analysis_Lab&quot;                          
+## [19] &quot;X_Row.Count.&quot;</code></pre>
+<p>That worked, but only for the first ., we need gsub</p>
+<pre class="r"><code>gsub(&quot;\\.&quot;,&quot;_&quot;,names(raw_data))</code></pre>
+<pre><code>##  [1] &quot;HBNAME&quot;                                
+##  [2] &quot;Site&quot;                                  
+##  [3] &quot;Date&quot;                                  
+##  [4] &quot;Date_Analysed&quot;                         
+##  [5] &quot;SW_Sample_Number&quot;                      
+##  [6] &quot;N1_Description&quot;                        
+##  [7] &quot;N1_Reported_Value&quot;                     
+##  [8] &quot;N1_Sample_1&quot;                           
+##  [9] &quot;N1_Sample_2&quot;                           
+## [10] &quot;N1_Sample_3&quot;                           
+## [11] &quot;Calculated_Mean&quot;                       
+## [12] &quot;Standard_Deviation&quot;                    
+## [13] &quot;Flow__l_day_&quot;                          
+## [14] &quot;Ammonia__mg_l_&quot;                        
+## [15] &quot;pH_Value&quot;                              
+## [16] &quot;Modelled_Flow__l_day_&quot;                 
+## [17] &quot;Million_Gene_Copies_Per_Person_per_Day&quot;
+## [18] &quot;Analysis_Lab&quot;                          
+## [19] &quot;X_Row_Count_&quot;</code></pre>
+<p>If we look at 13, ‘Flow_<em>l_day</em>’ looks weird it is cause it
+was ‘Flow..l.day.’ with two dots. We can tell gsup to match multiple
+consecutive appearence of a character with + (which means at least 1),
+or * which means (0 or many)</p>
+<pre class="r"><code>gsub(&quot;\\.+&quot;,&quot;_&quot;,names(raw_data))</code></pre>
+<pre><code>##  [1] &quot;HBNAME&quot;                                
+##  [2] &quot;Site&quot;                                  
+##  [3] &quot;Date&quot;                                  
+##  [4] &quot;Date_Analysed&quot;                         
+##  [5] &quot;SW_Sample_Number&quot;                      
+##  [6] &quot;N1_Description&quot;                        
+##  [7] &quot;N1_Reported_Value&quot;                     
+##  [8] &quot;N1_Sample_1&quot;                           
+##  [9] &quot;N1_Sample_2&quot;                           
+## [10] &quot;N1_Sample_3&quot;                           
+## [11] &quot;Calculated_Mean&quot;                       
+## [12] &quot;Standard_Deviation&quot;                    
+## [13] &quot;Flow_l_day_&quot;                           
+## [14] &quot;Ammonia_mg_l_&quot;                         
+## [15] &quot;pH_Value&quot;                              
+## [16] &quot;Modelled_Flow_l_day_&quot;                  
+## [17] &quot;Million_Gene_Copies_Per_Person_per_Day&quot;
+## [18] &quot;Analysis_Lab&quot;                          
+## [19] &quot;X_Row_Count_&quot;</code></pre>
+<p>Now the only annoying part is the last, handing _</p>
+<p>We can match the end of word with $ sign, so we can replace only the
+last occurence. For example,</p>
+<pre class="r"><code>gsub(&quot;\\.$&quot;,&quot;ZZZ&quot;,names(raw_data))</code></pre>
+<pre><code>##  [1] &quot;HBNAME&quot;                                
+##  [2] &quot;Site&quot;                                  
+##  [3] &quot;Date&quot;                                  
+##  [4] &quot;Date.Analysed&quot;                         
+##  [5] &quot;SW.Sample.Number&quot;                      
+##  [6] &quot;N1.Description&quot;                        
+##  [7] &quot;N1.Reported.Value&quot;                     
+##  [8] &quot;N1.Sample.1&quot;                           
+##  [9] &quot;N1.Sample.2&quot;                           
+## [10] &quot;N1.Sample.3&quot;                           
+## [11] &quot;Calculated.Mean&quot;                       
+## [12] &quot;Standard.Deviation&quot;                    
+## [13] &quot;Flow..l.dayZZZ&quot;                        
+## [14] &quot;Ammonia..mg.lZZZ&quot;                      
+## [15] &quot;pH.Value&quot;                              
+## [16] &quot;Modelled.Flow..l.dayZZZ&quot;               
+## [17] &quot;Million.Gene.Copies.Per.Person.per.Day&quot;
+## [18] &quot;Analysis.Lab&quot;                          
+## [19] &quot;X.Row.CountZZZ&quot;</code></pre>
+<p>Attached ZZZ to the last ., what we want is replacing the last . with
+empty string “”</p>
+<pre class="r"><code>gsub(&quot;\\.$&quot;,&quot;&quot;,names(raw_data))</code></pre>
+<pre><code>##  [1] &quot;HBNAME&quot;                                
+##  [2] &quot;Site&quot;                                  
+##  [3] &quot;Date&quot;                                  
+##  [4] &quot;Date.Analysed&quot;                         
+##  [5] &quot;SW.Sample.Number&quot;                      
+##  [6] &quot;N1.Description&quot;                        
+##  [7] &quot;N1.Reported.Value&quot;                     
+##  [8] &quot;N1.Sample.1&quot;                           
+##  [9] &quot;N1.Sample.2&quot;                           
+## [10] &quot;N1.Sample.3&quot;                           
+## [11] &quot;Calculated.Mean&quot;                       
+## [12] &quot;Standard.Deviation&quot;                    
+## [13] &quot;Flow..l.day&quot;                           
+## [14] &quot;Ammonia..mg.l&quot;                         
+## [15] &quot;pH.Value&quot;                              
+## [16] &quot;Modelled.Flow..l.day&quot;                  
+## [17] &quot;Million.Gene.Copies.Per.Person.per.Day&quot;
+## [18] &quot;Analysis.Lab&quot;                          
+## [19] &quot;X.Row.Count&quot;</code></pre>
+<p>We can chain our two operations (it is called pipe) by using
+<code>%&gt;%</code></p>
+<pre class="r"><code>library(magrittr)
+gsub(&quot;\\.$&quot;,&quot;&quot;,names(raw_data)) %&gt;% gsub(&quot;\\.+&quot;,&quot;_&quot;,.)</code></pre>
+<pre><code>##  [1] &quot;HBNAME&quot;                                
+##  [2] &quot;Site&quot;                                  
+##  [3] &quot;Date&quot;                                  
+##  [4] &quot;Date_Analysed&quot;                         
+##  [5] &quot;SW_Sample_Number&quot;                      
+##  [6] &quot;N1_Description&quot;                        
+##  [7] &quot;N1_Reported_Value&quot;                     
+##  [8] &quot;N1_Sample_1&quot;                           
+##  [9] &quot;N1_Sample_2&quot;                           
+## [10] &quot;N1_Sample_3&quot;                           
+## [11] &quot;Calculated_Mean&quot;                       
+## [12] &quot;Standard_Deviation&quot;                    
+## [13] &quot;Flow_l_day&quot;                            
+## [14] &quot;Ammonia_mg_l&quot;                          
+## [15] &quot;pH_Value&quot;                              
+## [16] &quot;Modelled_Flow_l_day&quot;                   
+## [17] &quot;Million_Gene_Copies_Per_Person_per_Day&quot;
+## [18] &quot;Analysis_Lab&quot;                          
+## [19] &quot;X_Row_Count&quot;</code></pre>
+<p>The first gsub removed the last ., the second replaced other .(.)
+with _ Look like in the second gsub we passed the “Where” using . as
+argument, it means that the output of first gsub was passed to the
+second.</p>
+<p>For this code to work we needed to loead library which defines the
+pipe %&gt;% library(magrittr).</p>
+<p>We can do it for better readibility also for the first gsub and
+finally use it set the column names</p>
+<pre class="r"><code>names(raw_data) %&gt;%
+    gsub(&quot;\\.$&quot;,&quot;&quot;, .) %&gt;% 
+    gsub(&quot;\\.+&quot;,&quot;_&quot;,.) -&gt; new_name
+
+new_name[1] &lt;- &quot;Health_Board&quot;
+new_name[3] &lt;- &quot;Date_collected&quot;
+
+renamed_data = raw_data
+names(renamed_data) = new_name
+head(renamed_data[1:5])</code></pre>
+<pre><code>##   Health_Board       Site Date_collected Date_Analysed SW_Sample_Number
+## 1     Highland Allanfearn     01/06/2020       (Empty)         13953443
+## 2     Highland Allanfearn     02/06/2020       (Empty)         13953444
+## 3     Highland Allanfearn     04/06/2020       (Empty)         13953445
+## 4     Highland Allanfearn     08/06/2020       (Empty)         13953446
+## 5     Highland Allanfearn     09/06/2020       (Empty)         13953447
+## 6     Highland Allanfearn     10/06/2020       (Empty)         13953448</code></pre>
+<p>It is not exactly the same as our manually curated names, but it
+could be good enough for your use cases.</p>
 </div>
 </div>
 

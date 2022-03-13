@@ -136,4 +136,84 @@ write.csv(renamed_data, fName)
 
 We first checked if the output directory exists, if not create it and then we saved the file.
 
+### Automatic correction
 
+You may noticed that in mayority of the cases we just replaced . with _ in our new columm names.
+Segure it could be done in some automatic way.
+
+Indeed, it can be done using pattern matching with regular expressions. 
+You will need to read more about regular expressions on your own, but here we will deal with replacing one character with other.
+
+The command to replace is called sub or gsub (the first one replace only the first appearance) and we pass it to it "what to replace", "with what" and "Where". 
+
+So lets try it
+```{r}
+
+sub(".","_",names(raw_data))
+```
+
+OK that does not look good, it is cause '.' means any character, so every starting letter was replaced with _. We need to "escape" the  '.', using \\ which says it is just a . character
+
+```{r}
+
+sub("\\.","_",names(raw_data))
+```
+
+That worked, but only for the first ., we need gsub
+
+```{r}
+
+gsub("\\.","_",names(raw_data))
+```
+
+If we look at 13, 'Flow__l_day_' looks weird it is cause it was 'Flow..l.day.' with two dots.
+We can tell gsup to match multiple consecutive appearence of a character with + (which means at least 1), or * which means (0 or many)
+
+```{r}
+
+gsub("\\.+","_",names(raw_data))
+```
+Now the only annoying part is the last, handing _
+
+We can match the end of word with $ sign, so we can replace only the last occurence.
+For example,
+
+```{r}
+
+gsub("\\.$","ZZZ",names(raw_data))
+```
+Attached ZZZ to the last ., what we want is replacing the last . with empty string ""
+
+
+```{r}
+
+gsub("\\.$","",names(raw_data))
+```
+We can chain our two operations (it is called pipe) by using `%>%`
+
+```{r}
+library(magrittr)
+gsub("\\.$","",names(raw_data)) %>% gsub("\\.+","_",.)
+```
+The first gsub removed the last ., the second replaced other .(.) with _
+Look like in the second gsub we passed the "Where" using . as argument, it means that the
+output of first gsub was passed to the second. 
+
+For this code to work we needed to loead library which defines the pipe %>% library(magrittr).
+
+We can do it for better readibility also for the first gsub and finally use it set the column names
+
+```{r}
+names(raw_data) %>%
+    gsub("\\.$","", .) %>% 
+    gsub("\\.+","_",.) -> new_name
+
+new_name[1] <- "Health_Board"
+new_name[3] <- "Date_collected"
+
+renamed_data = raw_data
+names(renamed_data) = new_name
+head(renamed_data[1:5])
+```
+
+It is not exactly the same as our manually curated names, but it could be good enough for your use cases.
