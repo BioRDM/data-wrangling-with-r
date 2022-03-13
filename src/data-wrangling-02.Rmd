@@ -1,0 +1,90 @@
+---
+title: "Data wrangling with R - P2 Data Curation"
+author: "Sumy V Baby, Tomasz Zielinski"
+date: "2022-03-12"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+We continue our work with the data, now we will focus on actual data entries.
+
+We are going to fix some of the typical problems with real data.
+
+This and the following R-Markdown notebooks have been inspired by our real data curation work for the project about monitoring COVID virus levels in wastewater around Scotland ([see project page](https://biordm.github.io/COVID-Wastewater-Scotland/)).
+
+Firstly, read our renamed data.
+
+## Inspecting DATA
+
+```{r}
+library(dplyr)
+renamed_data <- read.csv("../data/renamed_data.csv")
+glimpse(renamed_data)
+
+```
+We used a different command `glimpse` to see all the columns (variables) and first data in each column.
+
+Site stores information about where the samples were taken. As it is entered manually it is possible that it contains some misspelled locations.
+
+## Chasing misspelled text
+
+We can get all the unique values for the `Site` variable and sort them. That way we can inspect the values and try to find close by duplicates.
+
+
+
+```{r}
+sites = renamed_data$Site
+sites = sort(unique(sites))
+sites
+
+```
+There are **7**, sites with close but not identical names.  
+One differs by having a space after the name.
+
+Can you spot them?*
+
+It would be better to identify them automatically.
+
+We could count the measurements for each site and find those which have less then 5, those are probably misspelled as each site was monitored more than few times.
+
+In order to do it .....
+
+.... NOw we need a code that does that.
+
+
+... then the code which takes a dictionary of wrong names and correct one and does the conversion
+...
+...
+
+
+## The factors variables
+
+Factors are variables that have only limitted set of options. 
+In our case N1_description is such a variable, as it describes
+the virust leves as Negative, Weak Poistive, Postives etc.
+
+.... now the code to convert to factors and find the wrong factors.
+((I change few descriptions to be misspelled (wrong letter size, mispelling or other key workd)))
+
+
+Show how to easily find them, fix and convert to factors
+
+
+## Dates
+
+Convert to dates, represent in iso format, find the wrong date by sorting or min max (the 1899),
+fix it.
+
+## Number
+Comment what to do with the numbers, for example use summary(Ammonia) to cehck it all look ok, 
+negative value would probably be wrong.
+
+
+Save the currated data to ../data/curated_data
+
+
+------------
+*The misspelled sites were: "Allanfearn ", "Invurie", "Langhlm", "Philiphill", "Sheildhall", "Stevenson", "hatton - Fintry West"

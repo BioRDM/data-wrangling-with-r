@@ -13,7 +13,7 @@
 
 <meta name="date" content="2022-03-12" />
 
-<title>Data wrangling with R - P1 Renaming</title>
+<title>Data wrangling with R - P2 Data Curation</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -359,565 +359,193 @@ pre code {
 
 
 
-<h1 class="title toc-ignore">Data wrangling with R - P1 Renaming</h1>
+<h1 class="title toc-ignore">Data wrangling with R - P2 Data
+Curation</h1>
 <h4 class="author">Sumy V Baby, Tomasz Zielinski</h4>
 <h4 class="date">2022-03-12</h4>
 
 </div>
 
 
-<p>Welcome to data wrangling with R.</p>
+<p>We continue our work with the data, now we will focus on actual data
+entries.</p>
+<p>We are going to fix some of the typical problems with real data.</p>
 <p>This and the following R-Markdown notebooks have been inspired by our
 real data curation work for the project about monitoring COVID virus
 levels in wastewater around Scotland (<a href="https://biordm.github.io/COVID-Wastewater-Scotland/">see project
 page</a>).</p>
-<p>Firstly, check our raw data.</p>
-<div id="inspecting-raw-data" class="section level2">
-<h2>Inspecting RAW DATA</h2>
-<p>Our raw data are included in the raw_data folder of this project.
-Let’s check what it contains</p>
-<pre class="r"><code>list.files(&quot;../raw_data&quot;)</code></pre>
-<pre><code>## [1] &quot;COVID_RNA_Monitoring.csv&quot; &quot;Sites_coordinates.csv&quot;   
-## [3] &quot;Sites_population.csv&quot;</code></pre>
-<p>*** The <code>../raw_data</code> means that we are going to navigate
-to the parent folder (we are in src folder) cause we use <code>..</code>
-and then we will list the content of the <code>raw_data</code> folder.
-***</p>
-<p>Let’s read measurements from the COVID RNA Monitoring Project
-file</p>
-<pre class="r"><code>raw_data &lt;- read.csv(&quot;../raw_data/COVID_RNA_Monitoring.csv&quot;)
-head(raw_data)</code></pre>
-<pre><code>##               HBNAME    Site       Date Date.Analysed SW.Sample.Number
-## 1 Ayrshire and Arran Cumnock 19/02/2021    22/02/2021         14725793
-## 2 Ayrshire and Arran Cumnock 23/02/2021    25/02/2021         14725796
-## 3 Ayrshire and Arran Cumnock 01/03/2021    03/03/2021         14725799
-## 4 Ayrshire and Arran Cumnock 08/03/2021    10/03/2021         14739085
-## 5 Ayrshire and Arran Cumnock 15/03/2021    16/03/2021         14757657
-## 6 Ayrshire and Arran Cumnock 22/03/2021    23/03/2021         14769351
-##   N1.Description N1.Reported.Value N1.Sample.1 N1.Sample.2 N1.Sample.3
-## 1       Positive             85619    85736.76    85501.84          NA
-## 2       Positive             75691    77788.09    73594.68          NA
-## 3       Positive             42624    41922.98    43325.61          NA
-## 4       Positive             12468    13332.41    11605.09          NA
-## 5       Positive             13535    15599.32    11471.97          NA
-## 6       Positive             30013    31819.96    28207.37          NA
-##   Calculated.Mean Standard.Deviation Flow..l.day. Ammonia..mg.l. pH.Value
-## 1        85619.30             166.12     19094400          14.84       NA
-## 2        75691.39            2965.19      9763200          11.31       NA
-## 3        42624.30             991.81      6393600          16.37       NA
-## 4        12468.75            1221.40           NA          21.18       NA
-## 5        13535.65            2918.48           NA          10.80       NA
-## 6        30013.66            2554.49           NA          20.26       NA
-##   Modelled.Flow..l.day. Million.Gene.Copies.Per.Person.per.Day Analysis.Lab
-## 1               9733698                                 119.42         SEPA
-## 2              11381460                                  53.98         SEPA
-## 3               9199052                                  19.91         SEPA
-## 4               7931065                                   7.22         SEPA
-## 5              11687861                                  11.56         SEPA
-## 6               8136458                                  17.84         SEPA
-##   X.Row.Count.
-## 1            1
-## 2            1
-## 3            1
-## 4            1
-## 5            1
-## 6            1</code></pre>
-<p><code>read.csv</code> read content of the file into
-<code>raw_data</code> variable.<br />
-<code>head(raw_data)</code> printed first few rows of the data.</p>
-<p>To have it as a nice wide table rather than wrapped around when
-generating r-markdown report we can use:</p>
-<pre class="r"><code>knitr::kable(
-  head(raw_data),
-  caption = &quot;COVID RNA levels in wastewater&quot;
-)</code></pre>
-<table>
-<caption>COVID RNA levels in wastewater</caption>
-<colgroup>
-<col width="6%" />
-<col width="2%" />
-<col width="3%" />
-<col width="4%" />
-<col width="5%" />
-<col width="5%" />
-<col width="6%" />
-<col width="4%" />
-<col width="4%" />
-<col width="4%" />
-<col width="5%" />
-<col width="6%" />
-<col width="4%" />
-<col width="5%" />
-<col width="3%" />
-<col width="7%" />
-<col width="13%" />
-<col width="4%" />
-<col width="4%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th align="left">HBNAME</th>
-<th align="left">Site</th>
-<th align="left">Date</th>
-<th align="left">Date.Analysed</th>
-<th align="right">SW.Sample.Number</th>
-<th align="left">N1.Description</th>
-<th align="right">N1.Reported.Value</th>
-<th align="right">N1.Sample.1</th>
-<th align="right">N1.Sample.2</th>
-<th align="right">N1.Sample.3</th>
-<th align="right">Calculated.Mean</th>
-<th align="right">Standard.Deviation</th>
-<th align="right">Flow..l.day.</th>
-<th align="right">Ammonia..mg.l.</th>
-<th align="right">pH.Value</th>
-<th align="right">Modelled.Flow..l.day.</th>
-<th align="right">Million.Gene.Copies.Per.Person.per.Day</th>
-<th align="left">Analysis.Lab</th>
-<th align="right">X.Row.Count.</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="left">Ayrshire and Arran</td>
-<td align="left">Cumnock</td>
-<td align="left">19/02/2021</td>
-<td align="left">22/02/2021</td>
-<td align="right">14725793</td>
-<td align="left">Positive</td>
-<td align="right">85619</td>
-<td align="right">85736.76</td>
-<td align="right">85501.84</td>
-<td align="right">NA</td>
-<td align="right">85619.30</td>
-<td align="right">166.12</td>
-<td align="right">19094400</td>
-<td align="right">14.84</td>
-<td align="right">NA</td>
-<td align="right">9733698</td>
-<td align="right">119.42</td>
-<td align="left">SEPA</td>
-<td align="right">1</td>
-</tr>
-<tr class="even">
-<td align="left">Ayrshire and Arran</td>
-<td align="left">Cumnock</td>
-<td align="left">23/02/2021</td>
-<td align="left">25/02/2021</td>
-<td align="right">14725796</td>
-<td align="left">Positive</td>
-<td align="right">75691</td>
-<td align="right">77788.09</td>
-<td align="right">73594.68</td>
-<td align="right">NA</td>
-<td align="right">75691.39</td>
-<td align="right">2965.19</td>
-<td align="right">9763200</td>
-<td align="right">11.31</td>
-<td align="right">NA</td>
-<td align="right">11381460</td>
-<td align="right">53.98</td>
-<td align="left">SEPA</td>
-<td align="right">1</td>
-</tr>
-<tr class="odd">
-<td align="left">Ayrshire and Arran</td>
-<td align="left">Cumnock</td>
-<td align="left">01/03/2021</td>
-<td align="left">03/03/2021</td>
-<td align="right">14725799</td>
-<td align="left">Positive</td>
-<td align="right">42624</td>
-<td align="right">41922.98</td>
-<td align="right">43325.61</td>
-<td align="right">NA</td>
-<td align="right">42624.30</td>
-<td align="right">991.81</td>
-<td align="right">6393600</td>
-<td align="right">16.37</td>
-<td align="right">NA</td>
-<td align="right">9199052</td>
-<td align="right">19.91</td>
-<td align="left">SEPA</td>
-<td align="right">1</td>
-</tr>
-<tr class="even">
-<td align="left">Ayrshire and Arran</td>
-<td align="left">Cumnock</td>
-<td align="left">08/03/2021</td>
-<td align="left">10/03/2021</td>
-<td align="right">14739085</td>
-<td align="left">Positive</td>
-<td align="right">12468</td>
-<td align="right">13332.41</td>
-<td align="right">11605.09</td>
-<td align="right">NA</td>
-<td align="right">12468.75</td>
-<td align="right">1221.40</td>
-<td align="right">NA</td>
-<td align="right">21.18</td>
-<td align="right">NA</td>
-<td align="right">7931065</td>
-<td align="right">7.22</td>
-<td align="left">SEPA</td>
-<td align="right">1</td>
-</tr>
-<tr class="odd">
-<td align="left">Ayrshire and Arran</td>
-<td align="left">Cumnock</td>
-<td align="left">15/03/2021</td>
-<td align="left">16/03/2021</td>
-<td align="right">14757657</td>
-<td align="left">Positive</td>
-<td align="right">13535</td>
-<td align="right">15599.32</td>
-<td align="right">11471.97</td>
-<td align="right">NA</td>
-<td align="right">13535.65</td>
-<td align="right">2918.48</td>
-<td align="right">NA</td>
-<td align="right">10.80</td>
-<td align="right">NA</td>
-<td align="right">11687861</td>
-<td align="right">11.56</td>
-<td align="left">SEPA</td>
-<td align="right">1</td>
-</tr>
-<tr class="even">
-<td align="left">Ayrshire and Arran</td>
-<td align="left">Cumnock</td>
-<td align="left">22/03/2021</td>
-<td align="left">23/03/2021</td>
-<td align="right">14769351</td>
-<td align="left">Positive</td>
-<td align="right">30013</td>
-<td align="right">31819.96</td>
-<td align="right">28207.37</td>
-<td align="right">NA</td>
-<td align="right">30013.66</td>
-<td align="right">2554.49</td>
-<td align="right">NA</td>
-<td align="right">20.26</td>
-<td align="right">NA</td>
-<td align="right">8136458</td>
-<td align="right">17.84</td>
-<td align="left">SEPA</td>
-<td align="right">1</td>
-</tr>
-</tbody>
-</table>
-<p>Some of the columns have . in their name, it is because the original
-file contained columns names with space. It is generally a bad practice
-to have spaces in columns names. Also some columns are not descriptive
-enough, for example <code>HBOARD</code> stands for health board and the
-<code>Date</code> is actually a date on which the samples were
-collected.</p>
-<p>So let’s rename the columns.</p>
+<p>Firstly, read our renamed data.</p>
+<div id="inspecting-data" class="section level2">
+<h2>Inspecting DATA</h2>
+<pre class="r"><code>library(dplyr)</code></pre>
+<pre><code>## 
+## Attaching package: &#39;dplyr&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:stats&#39;:
+## 
+##     filter, lag</code></pre>
+<pre><code>## The following objects are masked from &#39;package:base&#39;:
+## 
+##     intersect, setdiff, setequal, union</code></pre>
+<pre class="r"><code>renamed_data &lt;- read.csv(&quot;../data/renamed_data.csv&quot;)
+glimpse(renamed_data)</code></pre>
+<pre><code>## Rows: 10,316
+## Columns: 19
+## $ Health_Board                           &lt;chr&gt; &quot;Ayrshire and Arran&quot;, &quot;Ayrshire~
+## $ Site                                   &lt;chr&gt; &quot;Cumnock&quot;, &quot;Cumnock&quot;, &quot;Cumnock&quot;~
+## $ Date_collected                         &lt;chr&gt; &quot;19/02/2021&quot;, &quot;23/02/2021&quot;, &quot;01~
+## $ Date_analysed                          &lt;chr&gt; &quot;22/02/2021&quot;, &quot;25/02/2021&quot;, &quot;03~
+## $ SW_sample_number                       &lt;int&gt; 14725793, 14725796, 14725799, 1~
+## $ N1_description                         &lt;chr&gt; &quot;Positive&quot;, &quot;Positive&quot;, &quot;Positi~
+## $ N1_Reported_value.gc_per_L             &lt;int&gt; 85619, 75691, 42624, 12468, 135~
+## $ N1_Repl_1.gc_per_L                     &lt;dbl&gt; 85736.76, 77788.09, 41922.98, 1~
+## $ N1_Repl_2.gc_per_L                     &lt;dbl&gt; 85501.84, 73594.68, 43325.61, 1~
+## $ N1_Repl_3.gc_per_L                     &lt;dbl&gt; NA, NA, NA, NA, NA, NA, NA, NA,~
+## $ Calculated_mean                        &lt;dbl&gt; 85619.30, 75691.39, 42624.30, 1~
+## $ Standard_Deviation                     &lt;dbl&gt; 166.12, 2965.19, 991.81, 1221.4~
+## $ Flow_L_per_day                         &lt;int&gt; 19094400, 9763200, 6393600, NA,~
+## $ Ammonia_mg_per_L                       &lt;dbl&gt; 14.84, 11.31, 16.37, 21.18, 10.~
+## $ pH_value                               &lt;dbl&gt; NA, NA, NA, NA, NA, NA, NA, NA,~
+## $ Modelled_flow.L_per_day                &lt;int&gt; 9733698, 11381460, 9199052, 793~
+## $ Million_gene_copies_per_person_per_day &lt;dbl&gt; 119.42, 53.98, 19.91, 7.22, 11.~
+## $ Analysis_lab                           &lt;chr&gt; &quot;SEPA&quot;, &quot;SEPA&quot;, &quot;SEPA&quot;, &quot;SEPA&quot;,~
+## $ Row_Count                              &lt;int&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1~</code></pre>
+<p>We used a different command <code>glimpse</code> to see all the
+columns (variables) and first data in each column.</p>
+<p>Site stores information about where the samples were taken. As it is
+entered manually it is possible that it contains some misspelled
+locations.</p>
 </div>
-<div id="renaming-columns" class="section level2">
-<h2>Renaming columns</h2>
-<pre class="r"><code>renamed_data &lt;- raw_data
-names(renamed_data)[1] &lt;- &quot;Health_Board&quot;
-names(renamed_data)[3] &lt;- &quot;Date_collected&quot;
-head(renamed_data[1:5])</code></pre>
-<pre><code>##         Health_Board    Site Date_collected Date.Analysed SW.Sample.Number
-## 1 Ayrshire and Arran Cumnock     19/02/2021    22/02/2021         14725793
-## 2 Ayrshire and Arran Cumnock     23/02/2021    25/02/2021         14725796
-## 3 Ayrshire and Arran Cumnock     01/03/2021    03/03/2021         14725799
-## 4 Ayrshire and Arran Cumnock     08/03/2021    10/03/2021         14739085
-## 5 Ayrshire and Arran Cumnock     15/03/2021    16/03/2021         14757657
-## 6 Ayrshire and Arran Cumnock     22/03/2021    23/03/2021         14769351</code></pre>
-<p><code>names</code> in base R can be used to both read the column
-names or to set it, depending if it is used in assignment or not.</p>
-<p>That approach is error prone and tedious as we need to use the
-correct column index (see that date was in column 3 not 2).</p>
-<div id="renaming-by-selection" class="section level3">
-<h3>Renaming by selection</h3>
-<p>It would be better if we could select which columns we want to rename
-and provide new names.<br />
-For example:</p>
-<pre class="r"><code>old_name = c(&quot;HBNAME&quot;,&quot;Date&quot;,&quot;Date.Analysed&quot;)
-new_name = c(&quot;Health_Board&quot;,&quot;Date_collected&quot;,&quot;Date_analysed&quot;)
-renamed_data &lt;- raw_data
-names(renamed_data)[names(renamed_data) %in% old_name] = new_name
-head(renamed_data[1:5])</code></pre>
-<pre><code>##         Health_Board    Site Date_collected Date_analysed SW.Sample.Number
-## 1 Ayrshire and Arran Cumnock     19/02/2021    22/02/2021         14725793
-## 2 Ayrshire and Arran Cumnock     23/02/2021    25/02/2021         14725796
-## 3 Ayrshire and Arran Cumnock     01/03/2021    03/03/2021         14725799
-## 4 Ayrshire and Arran Cumnock     08/03/2021    10/03/2021         14739085
-## 5 Ayrshire and Arran Cumnock     15/03/2021    16/03/2021         14757657
-## 6 Ayrshire and Arran Cumnock     22/03/2021    23/03/2021         14769351</code></pre>
-<p>We still need to provide the new names in the right order!</p>
-<p>Probably less error prone is actually to get all the existing names,
-change them and set back.</p>
+<div id="chasing-misspelled-text" class="section level2">
+<h2>Chasing misspelled text</h2>
+<p>We can get all the unique values for the <code>Site</code> variable
+and sort them. That way we can inspect the values and try to find close
+by duplicates.</p>
+<pre class="r"><code>sites = renamed_data$Site
+sites = sort(unique(sites))
+sites</code></pre>
+<pre><code>##   [1] &quot;Allanfearn&quot;                        &quot;Allanfearn &quot;                      
+##   [3] &quot;Allers&quot;                            &quot;Allers - St Leonards&quot;             
+##   [5] &quot;Alloa&quot;                             &quot;Alness&quot;                           
+##   [7] &quot;Alva&quot;                              &quot;Annan&quot;                            
+##   [9] &quot;Ardoch&quot;                            &quot;Armadale&quot;                         
+##  [11] &quot;Aviemore&quot;                          &quot;Banchory&quot;                         
+##  [13] &quot;Banff&quot;                             &quot;Bathgate&quot;                         
+##  [15] &quot;Biggar&quot;                            &quot;Blackburn&quot;                        
+##  [17] &quot;Blackridge&quot;                        &quot;Blackwood&quot;                        
+##  [19] &quot;Blairgowrie&quot;                       &quot;Boness&quot;                           
+##  [21] &quot;Bonnybridge&quot;                       &quot;Bothwellbank&quot;                     
+##  [23] &quot;Bowhouse&quot;                          &quot;Buckie&quot;                           
+##  [25] &quot;Carbarn&quot;                           &quot;Carbarns&quot;                         
+##  [27] &quot;Coldstream&quot;                        &quot;Cumnock&quot;                          
+##  [29] &quot;Cumnock - Netherwood&quot;              &quot;Cupar&quot;                            
+##  [31] &quot;Dalbeattie&quot;                        &quot;Daldowie&quot;                         
+##  [33] &quot;Dalmarnock&quot;                        &quot;Dalmuir&quot;                          
+##  [35] &quot;Dalmuir - Auchinairn (6298)&quot;       &quot;Dalmuir - Auchinairn (6330)&quot;      
+##  [37] &quot;Dalmuir - Clydebank&quot;               &quot;Dalmuir - Minerva St&quot;             
+##  [39] &quot;Dalmuir - SECC&quot;                    &quot;Dalscone&quot;                         
+##  [41] &quot;Denny&quot;                             &quot;Dunbar&quot;                           
+##  [43] &quot;Dunblane&quot;                          &quot;Dunfermline&quot;                      
+##  [45] &quot;Dunnswood&quot;                         &quot;Dunnswood - Carrickstone&quot;         
+##  [47] &quot;Dunoon&quot;                            &quot;Duns&quot;                             
+##  [49] &quot;East Calder&quot;                       &quot;Ellon&quot;                            
+##  [51] &quot;Erskine&quot;                           &quot;Eyemouth&quot;                         
+##  [53] &quot;Fairlie&quot;                           &quot;Falkirk&quot;                          
+##  [55] &quot;Fauldhouse&quot;                        &quot;Forfar&quot;                           
+##  [57] &quot;Forfar - Central&quot;                  &quot;Forres&quot;                           
+##  [59] &quot;Fort William&quot;                      &quot;Fort William &quot;                    
+##  [61] &quot;Fraserburgh&quot;                       &quot;Galashiels&quot;                       
+##  [63] &quot;Galashiels &quot;                       &quot;Girvan&quot;                           
+##  [65] &quot;Grantown on Spey&quot;                  &quot;Guardbridge&quot;                      
+##  [67] &quot;Haddington&quot;                        &quot;Hamilton&quot;                         
+##  [69] &quot;Harthill&quot;                          &quot;Hatton&quot;                           
+##  [71] &quot;Hatton - Fintry East&quot;              &quot;Hatton - Fintry North&quot;            
+##  [73] &quot;hatton - Fintry West&quot;              &quot;Hatton - Fintry West&quot;             
+##  [75] &quot;Hawick&quot;                            &quot;Helensburgh&quot;                      
+##  [77] &quot;Huntly&quot;                            &quot;Inverclyde&quot;                       
+##  [79] &quot;Inverclyde - Gourock&quot;              &quot;Inverurie&quot;                        
+##  [81] &quot;Invurie&quot;                           &quot;Ironmill Bay&quot;                     
+##  [83] &quot;Jedburgh&quot;                          &quot;Kelso&quot;                            
+##  [85] &quot;Kincardine&quot;                        &quot;Kinneil&quot;                          
+##  [87] &quot;Kirkcaldy&quot;                         &quot;Kirkwall&quot;                         
+##  [89] &quot;Lanark&quot;                            &quot;Langhlm&quot;                          
+##  [91] &quot;Langholm&quot;                          &quot;Largs&quot;                            
+##  [93] &quot;Lerwick&quot;                           &quot;Lesmahagow&quot;                       
+##  [95] &quot;Levenmouth&quot;                        &quot;Linlithgow&quot;                       
+##  [97] &quot;Loch Ryan&quot;                         &quot;Lockerbie&quot;                        
+##  [99] &quot;Lossiemouth&quot;                       &quot;Mauldslie&quot;                        
+## [101] &quot;Maybole&quot;                           &quot;Meadowhead&quot;                       
+## [103] &quot;Meadowhead - Kilmarnock HMP&quot;       &quot;Montrose&quot;                         
+## [105] &quot;Muirkirk&quot;                          &quot;Nairn&quot;                            
+## [107] &quot;Neilston&quot;                          &quot;New Cumnock&quot;                      
+## [109] &quot;Newbridge&quot;                         &quot;Newburgh&quot;                         
+## [111] &quot;Newport &amp; Tayport&quot;                 &quot;Newtown St Boswell&quot;               
+## [113] &quot;Nigg&quot;                              &quot;Nigg - Aberdeen RI&quot;               
+## [115] &quot;Nigg - Torry&quot;                      &quot;Oban&quot;                             
+## [117] &quot;Paisley&quot;                           &quot;Paisley - Airport&quot;                
+## [119] &quot;Paisley - Blackhall&quot;               &quot;Paisley - Brediland&quot;              
+## [121] &quot;Peebles&quot;                           &quot;Penicuik&quot;                         
+## [123] &quot;Persley&quot;                           &quot;Persley - Northfield&quot;             
+## [125] &quot;Perth&quot;                             &quot;Perth &quot;                           
+## [127] &quot;Peterhead&quot;                         &quot;Philiphill&quot;                       
+## [129] &quot;Philipshill&quot;                       &quot;Philipshill - Hairmyres Hospital&quot; 
+## [131] &quot;Philipshill - Stewartfield (3606)&quot; &quot;Philipshill - Stewartfield (7801)&quot;
+## [133] &quot;Sanquhar&quot;                          &quot;Seafield&quot;                         
+## [135] &quot;Seafield - Cockenzie&quot;              &quot;Seafield - Craigmillar&quot;           
+## [137] &quot;Seafield - Muirhouse&quot;              &quot;Seafield - Restalrig&quot;             
+## [139] &quot;Seafield - Tranent&quot;                &quot;Seafield - Western General&quot;       
+## [141] &quot;Selkirk&quot;                           &quot;Sheildhall&quot;                       
+## [143] &quot;Shieldhall&quot;                        &quot;Shieldhall - Barrhead&quot;            
+## [145] &quot;Shieldhall - Gorbals&quot;              &quot;Shieldhall - Govanhill&quot;           
+## [147] &quot;Shieldhall - IMAX&quot;                 &quot;Shieldhall - Pollockshields West&quot; 
+## [149] &quot;Shieldhall - Science Centre&quot;       &quot;Shotts&quot;                           
+## [151] &quot;Skellyton&quot;                         &quot;Springfield&quot;                      
+## [153] &quot;St Andrews&quot;                        &quot;St Andrews - University (2979)&quot;   
+## [155] &quot;St Andrews - University (4964)&quot;    &quot;Stevenson&quot;                        
+## [157] &quot;Stevenson - Stevenston West&quot;       &quot;Stevenston&quot;                       
+## [159] &quot;Stevenston - Stevenston East&quot;      &quot;Stevenston - Stevenston West&quot;     
+## [161] &quot;Stirling&quot;                          &quot;Stirling - University&quot;            
+## [163] &quot;Stonehouse&quot;                        &quot;Stornoway&quot;                        
+## [165] &quot;Strathaven&quot;                        &quot;Swinstie&quot;                         
+## [167] &quot;Thurso&quot;                            &quot;Tillicoultry&quot;                     
+## [169] &quot;Troqueer&quot;                          &quot;Turriff&quot;                          
+## [171] &quot;Uplawmoor&quot;                         &quot;Whitburn&quot;                         
+## [173] &quot;Wick&quot;                              &quot;Winchburgh&quot;</code></pre>
+<p>There are <strong>7</strong>, sites with close but not identical
+names.<br />
+One differs by having a space after the name.</p>
+<p>Can you spot them?*</p>
+<p>It would be better to identify them automatically.</p>
+<p>We could count the measurements for each site and find those which
+have less then 5, those are probably misspelled as each site was
+monitored more than few times.</p>
+<p>In order to do it …..</p>
+<p>…. NOw we need a code that does that.</p>
+<p>… then the code which takes a dictionary of wrong names and correct
+one and does the conversion … …</p>
 </div>
-<div id="renaming-all" class="section level3">
-<h3>Renaming all</h3>
-<p>For that we need a vector with new names, we could generate a text
-template with a following command</p>
-<pre class="r"><code>print(paste0(&quot;&#39;&quot;, names(raw_data),&quot;&#39;&quot;, collapse=&quot;,&quot;))</code></pre>
-<pre><code>## [1] &quot;&#39;HBNAME&#39;,&#39;Site&#39;,&#39;Date&#39;,&#39;Date.Analysed&#39;,&#39;SW.Sample.Number&#39;,&#39;N1.Description&#39;,&#39;N1.Reported.Value&#39;,&#39;N1.Sample.1&#39;,&#39;N1.Sample.2&#39;,&#39;N1.Sample.3&#39;,&#39;Calculated.Mean&#39;,&#39;Standard.Deviation&#39;,&#39;Flow..l.day.&#39;,&#39;Ammonia..mg.l.&#39;,&#39;pH.Value&#39;,&#39;Modelled.Flow..l.day.&#39;,&#39;Million.Gene.Copies.Per.Person.per.Day&#39;,&#39;Analysis.Lab&#39;,&#39;X.Row.Count.&#39;&quot;</code></pre>
-<p>We used ’ so that the escape &quot; character won’t be printed Now we can
-edit the columns ones by one and use to set the new names</p>
-<pre class="r"><code>new_name = c(&#39;Health_Board&#39;,&#39;Site&#39;,&#39;Date_collected&#39;,&#39;Date_analysed&#39;,&#39;SW_sample_number&#39;,&#39;N1.Description&#39;,&#39;N1.Reported.Value&#39;,&#39;N1.Sample.1&#39;,&#39;N1.Sample.2&#39;,&#39;N1.Sample.3&#39;,&#39;Calculated.Mean&#39;,&#39;Standard.Deviation&#39;,&#39;Flow..l.day.&#39;,&#39;Ammonia..mg.l.&#39;,&#39;pH.Value&#39;,&#39;Modelled.Flow..l.day.&#39;,&#39;Million.Gene.Copies.Per.Person.per.Day&#39;,&#39;Analysis.Lab&#39;,&#39;Row_Count&#39;)
-renamed_data &lt;- raw_data
-names(renamed_data) = new_name
-head(renamed_data[1:5])</code></pre>
-<pre><code>##         Health_Board    Site Date_collected Date_analysed SW_sample_number
-## 1 Ayrshire and Arran Cumnock     19/02/2021    22/02/2021         14725793
-## 2 Ayrshire and Arran Cumnock     23/02/2021    25/02/2021         14725796
-## 3 Ayrshire and Arran Cumnock     01/03/2021    03/03/2021         14725799
-## 4 Ayrshire and Arran Cumnock     08/03/2021    10/03/2021         14739085
-## 5 Ayrshire and Arran Cumnock     15/03/2021    16/03/2021         14757657
-## 6 Ayrshire and Arran Cumnock     22/03/2021    23/03/2021         14769351</code></pre>
-<p>The best solution would be to provide names dictionary, which will
-match old names with new names. That way we will be resilient to changes
-in the columns order.</p>
+<div id="the-factors-variables" class="section level2">
+<h2>The factors variables</h2>
+<p>Factors are variables that have only limitted set of options. In our
+case N1_description is such a variable, as it describes the virust leves
+as Negative, Weak Poistive, Postives etc.</p>
+<p>…. now the code to convert to factors and find the wrong factors. ((I
+change few descriptions to be misspelled (wrong letter size, mispelling
+or other key workd)))</p>
+<p>Show how to easily find them, fix and convert to factors</p>
 </div>
-<div id="renaming-with-dictionary" class="section level3">
-<h3>Renaming with dictionary</h3>
-<pre class="r"><code>dictionary &lt;- data.frame(
-  old_name = c(&quot;Date&quot;,          &quot;Date.Analysed&quot;, &quot;HBNAME&quot;),
-  new_name = c(&quot;Date_collected&quot;,&quot;Date_analysed&quot;, &quot;Health_Board&quot;)
-)
-renamed_data &lt;- raw_data
-names(renamed_data)[match(dictionary$old_name, names(renamed_data))] &lt;- dictionary$new_name
-head(renamed_data[1:5])</code></pre>
-<pre><code>##         Health_Board    Site Date_collected Date_analysed SW.Sample.Number
-## 1 Ayrshire and Arran Cumnock     19/02/2021    22/02/2021         14725793
-## 2 Ayrshire and Arran Cumnock     23/02/2021    25/02/2021         14725796
-## 3 Ayrshire and Arran Cumnock     01/03/2021    03/03/2021         14725799
-## 4 Ayrshire and Arran Cumnock     08/03/2021    10/03/2021         14739085
-## 5 Ayrshire and Arran Cumnock     15/03/2021    16/03/2021         14757657
-## 6 Ayrshire and Arran Cumnock     22/03/2021    23/03/2021         14769351</code></pre>
-<p>Look how the first column was renamed even it was the last one in our
-dictionary.</p>
-<p>We could of course create a file with the old and new names, and read
-the mappings from there. Try to do it yourself.</p>
-<p>So lets rename all the columns using two lists of names</p>
-<pre class="r"><code>dictionary &lt;- data.frame(
-  old_name = c(&#39;HBNAME&#39;,&#39;Site&#39;,&#39;Date&#39;,&#39;Date.Analysed&#39;,&#39;SW.Sample.Number&#39;,&#39;N1.Description&#39;,&#39;N1.Reported.Value&#39;,&#39;N1.Sample.1&#39;,&#39;N1.Sample.2&#39;,&#39;N1.Sample.3&#39;,&#39;Calculated.Mean&#39;,&#39;Standard.Deviation&#39;,&#39;Flow..l.day.&#39;,&#39;Ammonia..mg.l.&#39;,&#39;pH.Value&#39;,&#39;Modelled.Flow..l.day.&#39;,&#39;Million.Gene.Copies.Per.Person.per.Day&#39;,&#39;Analysis.Lab&#39;,&#39;X.Row.Count.&#39;),
-
-  new_name = c(&quot;Health_Board&quot;,&quot;Site&quot;,&quot;Date_collected&quot;,&quot;Date_analysed&quot;, &quot;SW_sample_number&quot;,&quot;N1_description&quot;, &quot;N1_Reported_value-gc_per_L&quot;,&quot;N1_Repl_1-gc_per_L&quot;,&quot;N1_Repl_2-gc_per_L&quot;,&quot;N1_Repl_3-gc_per_L&quot;,&quot;Calculated_mean&quot;,&quot;Standard_Deviation&quot;,&quot;Flow_L_per_day&quot;,&quot;Ammonia_mg_per_L&quot;,&quot;pH_value&quot;,&quot;Modelled_flow-L_per_day&quot;,&quot;Million_gene_copies_per_person_per_day&quot;,&quot;Analysis_lab&quot;,&quot;Row_Count&quot;)
-)
-renamed_data &lt;- raw_data
-names(renamed_data)[match(dictionary$old_name, names(renamed_data))] &lt;- dictionary$new_name
-head(renamed_data[1:5])</code></pre>
-<pre><code>##         Health_Board    Site Date_collected Date_analysed SW_sample_number
-## 1 Ayrshire and Arran Cumnock     19/02/2021    22/02/2021         14725793
-## 2 Ayrshire and Arran Cumnock     23/02/2021    25/02/2021         14725796
-## 3 Ayrshire and Arran Cumnock     01/03/2021    03/03/2021         14725799
-## 4 Ayrshire and Arran Cumnock     08/03/2021    10/03/2021         14739085
-## 5 Ayrshire and Arran Cumnock     15/03/2021    16/03/2021         14757657
-## 6 Ayrshire and Arran Cumnock     22/03/2021    23/03/2021         14769351</code></pre>
-<p>Let’s save our renamed data into a file.</p>
-<pre class="r"><code>if (!file.exists(&#39;../data&#39;)) {
-  dir.create(file.path(&#39;..&#39;, &#39;data&#39;))  
-}
-
-fName = &#39;../data/renamed_data.csv&#39;
-write.csv(renamed_data, fName, row.names = FALSE)</code></pre>
-<p>We first checked if the output directory exists, if not create it and
-then we saved the file.</p>
+<div id="dates" class="section level2">
+<h2>Dates</h2>
+<p>Convert to dates, represent in iso format, find the wrong date by
+sorting or min max (the 1899), fix it.</p>
 </div>
-<div id="automatic-correction" class="section level3">
-<h3>Automatic correction</h3>
-<p>You may noticed that in mayority of the cases we just replaced . with
-_ in our new columm names. Segure it could be done in some automatic
-way.</p>
-<p>Indeed, it can be done using pattern matching with regular
-expressions. You will need to read more about regular expressions on
-your own, but here we will deal with replacing one character with
-other.</p>
-<p>The command to replace is called sub or gsub (the first one replace
-only the first appearance) and we pass it to it “what to replace”, “with
-what” and “Where”.</p>
-<p>So lets try it</p>
-<pre class="r"><code>sub(&quot;.&quot;,&quot;_&quot;,names(raw_data))</code></pre>
-<pre><code>##  [1] &quot;_BNAME&quot;                                
-##  [2] &quot;_ite&quot;                                  
-##  [3] &quot;_ate&quot;                                  
-##  [4] &quot;_ate.Analysed&quot;                         
-##  [5] &quot;_W.Sample.Number&quot;                      
-##  [6] &quot;_1.Description&quot;                        
-##  [7] &quot;_1.Reported.Value&quot;                     
-##  [8] &quot;_1.Sample.1&quot;                           
-##  [9] &quot;_1.Sample.2&quot;                           
-## [10] &quot;_1.Sample.3&quot;                           
-## [11] &quot;_alculated.Mean&quot;                       
-## [12] &quot;_tandard.Deviation&quot;                    
-## [13] &quot;_low..l.day.&quot;                          
-## [14] &quot;_mmonia..mg.l.&quot;                        
-## [15] &quot;_H.Value&quot;                              
-## [16] &quot;_odelled.Flow..l.day.&quot;                 
-## [17] &quot;_illion.Gene.Copies.Per.Person.per.Day&quot;
-## [18] &quot;_nalysis.Lab&quot;                          
-## [19] &quot;_.Row.Count.&quot;</code></pre>
-<p>OK that does not look good, it is cause ‘.’ means any character, so
-every starting letter was replaced with _. We need to “escape” the ‘.’,
-using \ which says it is just a . character</p>
-<pre class="r"><code>sub(&quot;\\.&quot;,&quot;_&quot;,names(raw_data))</code></pre>
-<pre><code>##  [1] &quot;HBNAME&quot;                                
-##  [2] &quot;Site&quot;                                  
-##  [3] &quot;Date&quot;                                  
-##  [4] &quot;Date_Analysed&quot;                         
-##  [5] &quot;SW_Sample.Number&quot;                      
-##  [6] &quot;N1_Description&quot;                        
-##  [7] &quot;N1_Reported.Value&quot;                     
-##  [8] &quot;N1_Sample.1&quot;                           
-##  [9] &quot;N1_Sample.2&quot;                           
-## [10] &quot;N1_Sample.3&quot;                           
-## [11] &quot;Calculated_Mean&quot;                       
-## [12] &quot;Standard_Deviation&quot;                    
-## [13] &quot;Flow_.l.day.&quot;                          
-## [14] &quot;Ammonia_.mg.l.&quot;                        
-## [15] &quot;pH_Value&quot;                              
-## [16] &quot;Modelled_Flow..l.day.&quot;                 
-## [17] &quot;Million_Gene.Copies.Per.Person.per.Day&quot;
-## [18] &quot;Analysis_Lab&quot;                          
-## [19] &quot;X_Row.Count.&quot;</code></pre>
-<p>That worked, but only for the first ., we need gsub</p>
-<pre class="r"><code>gsub(&quot;\\.&quot;,&quot;_&quot;,names(raw_data))</code></pre>
-<pre><code>##  [1] &quot;HBNAME&quot;                                
-##  [2] &quot;Site&quot;                                  
-##  [3] &quot;Date&quot;                                  
-##  [4] &quot;Date_Analysed&quot;                         
-##  [5] &quot;SW_Sample_Number&quot;                      
-##  [6] &quot;N1_Description&quot;                        
-##  [7] &quot;N1_Reported_Value&quot;                     
-##  [8] &quot;N1_Sample_1&quot;                           
-##  [9] &quot;N1_Sample_2&quot;                           
-## [10] &quot;N1_Sample_3&quot;                           
-## [11] &quot;Calculated_Mean&quot;                       
-## [12] &quot;Standard_Deviation&quot;                    
-## [13] &quot;Flow__l_day_&quot;                          
-## [14] &quot;Ammonia__mg_l_&quot;                        
-## [15] &quot;pH_Value&quot;                              
-## [16] &quot;Modelled_Flow__l_day_&quot;                 
-## [17] &quot;Million_Gene_Copies_Per_Person_per_Day&quot;
-## [18] &quot;Analysis_Lab&quot;                          
-## [19] &quot;X_Row_Count_&quot;</code></pre>
-<p>If we look at 13, ‘Flow_<em>l_day</em>’ looks weird it is cause it
-was ‘Flow..l.day.’ with two dots. We can tell gsup to match multiple
-consecutive appearence of a character with + (which means at least 1),
-or * which means (0 or many)</p>
-<pre class="r"><code>gsub(&quot;\\.+&quot;,&quot;_&quot;,names(raw_data))</code></pre>
-<pre><code>##  [1] &quot;HBNAME&quot;                                
-##  [2] &quot;Site&quot;                                  
-##  [3] &quot;Date&quot;                                  
-##  [4] &quot;Date_Analysed&quot;                         
-##  [5] &quot;SW_Sample_Number&quot;                      
-##  [6] &quot;N1_Description&quot;                        
-##  [7] &quot;N1_Reported_Value&quot;                     
-##  [8] &quot;N1_Sample_1&quot;                           
-##  [9] &quot;N1_Sample_2&quot;                           
-## [10] &quot;N1_Sample_3&quot;                           
-## [11] &quot;Calculated_Mean&quot;                       
-## [12] &quot;Standard_Deviation&quot;                    
-## [13] &quot;Flow_l_day_&quot;                           
-## [14] &quot;Ammonia_mg_l_&quot;                         
-## [15] &quot;pH_Value&quot;                              
-## [16] &quot;Modelled_Flow_l_day_&quot;                  
-## [17] &quot;Million_Gene_Copies_Per_Person_per_Day&quot;
-## [18] &quot;Analysis_Lab&quot;                          
-## [19] &quot;X_Row_Count_&quot;</code></pre>
-<p>Now the only annoying part is the last, handing _</p>
-<p>We can match the end of word with $ sign, so we can replace only the
-last occurence. For example,</p>
-<pre class="r"><code>gsub(&quot;\\.$&quot;,&quot;ZZZ&quot;,names(raw_data))</code></pre>
-<pre><code>##  [1] &quot;HBNAME&quot;                                
-##  [2] &quot;Site&quot;                                  
-##  [3] &quot;Date&quot;                                  
-##  [4] &quot;Date.Analysed&quot;                         
-##  [5] &quot;SW.Sample.Number&quot;                      
-##  [6] &quot;N1.Description&quot;                        
-##  [7] &quot;N1.Reported.Value&quot;                     
-##  [8] &quot;N1.Sample.1&quot;                           
-##  [9] &quot;N1.Sample.2&quot;                           
-## [10] &quot;N1.Sample.3&quot;                           
-## [11] &quot;Calculated.Mean&quot;                       
-## [12] &quot;Standard.Deviation&quot;                    
-## [13] &quot;Flow..l.dayZZZ&quot;                        
-## [14] &quot;Ammonia..mg.lZZZ&quot;                      
-## [15] &quot;pH.Value&quot;                              
-## [16] &quot;Modelled.Flow..l.dayZZZ&quot;               
-## [17] &quot;Million.Gene.Copies.Per.Person.per.Day&quot;
-## [18] &quot;Analysis.Lab&quot;                          
-## [19] &quot;X.Row.CountZZZ&quot;</code></pre>
-<p>Attached ZZZ to the last ., what we want is replacing the last . with
-empty string “”</p>
-<pre class="r"><code>gsub(&quot;\\.$&quot;,&quot;&quot;,names(raw_data))</code></pre>
-<pre><code>##  [1] &quot;HBNAME&quot;                                
-##  [2] &quot;Site&quot;                                  
-##  [3] &quot;Date&quot;                                  
-##  [4] &quot;Date.Analysed&quot;                         
-##  [5] &quot;SW.Sample.Number&quot;                      
-##  [6] &quot;N1.Description&quot;                        
-##  [7] &quot;N1.Reported.Value&quot;                     
-##  [8] &quot;N1.Sample.1&quot;                           
-##  [9] &quot;N1.Sample.2&quot;                           
-## [10] &quot;N1.Sample.3&quot;                           
-## [11] &quot;Calculated.Mean&quot;                       
-## [12] &quot;Standard.Deviation&quot;                    
-## [13] &quot;Flow..l.day&quot;                           
-## [14] &quot;Ammonia..mg.l&quot;                         
-## [15] &quot;pH.Value&quot;                              
-## [16] &quot;Modelled.Flow..l.day&quot;                  
-## [17] &quot;Million.Gene.Copies.Per.Person.per.Day&quot;
-## [18] &quot;Analysis.Lab&quot;                          
-## [19] &quot;X.Row.Count&quot;</code></pre>
-<p>We can chain our two operations (it is called pipe) by using
-<code>%&gt;%</code></p>
-<pre class="r"><code>library(magrittr)
-gsub(&quot;\\.$&quot;,&quot;&quot;,names(raw_data)) %&gt;% gsub(&quot;\\.+&quot;,&quot;_&quot;,.)</code></pre>
-<pre><code>##  [1] &quot;HBNAME&quot;                                
-##  [2] &quot;Site&quot;                                  
-##  [3] &quot;Date&quot;                                  
-##  [4] &quot;Date_Analysed&quot;                         
-##  [5] &quot;SW_Sample_Number&quot;                      
-##  [6] &quot;N1_Description&quot;                        
-##  [7] &quot;N1_Reported_Value&quot;                     
-##  [8] &quot;N1_Sample_1&quot;                           
-##  [9] &quot;N1_Sample_2&quot;                           
-## [10] &quot;N1_Sample_3&quot;                           
-## [11] &quot;Calculated_Mean&quot;                       
-## [12] &quot;Standard_Deviation&quot;                    
-## [13] &quot;Flow_l_day&quot;                            
-## [14] &quot;Ammonia_mg_l&quot;                          
-## [15] &quot;pH_Value&quot;                              
-## [16] &quot;Modelled_Flow_l_day&quot;                   
-## [17] &quot;Million_Gene_Copies_Per_Person_per_Day&quot;
-## [18] &quot;Analysis_Lab&quot;                          
-## [19] &quot;X_Row_Count&quot;</code></pre>
-<p>The first gsub removed the last ., the second replaced other .(.)
-with _ Look like in the second gsub we passed the “Where” using . as
-argument, it means that the output of first gsub was passed to the
-second.</p>
-<p>For this code to work we needed to loead library which defines the
-pipe %&gt;% library(magrittr).</p>
-<p>We can do it for better readibility also for the first gsub and
-finally use it set the column names</p>
-<pre class="r"><code>names(raw_data) %&gt;%
-    gsub(&quot;\\.$&quot;,&quot;&quot;, .) %&gt;% 
-    gsub(&quot;\\.+&quot;,&quot;_&quot;,.) -&gt; new_name
-
-new_name[1] &lt;- &quot;Health_Board&quot;
-new_name[3] &lt;- &quot;Date_collected&quot;
-
-renamed_data = raw_data
-names(renamed_data) = new_name
-head(renamed_data[1:5])</code></pre>
-<pre><code>##         Health_Board    Site Date_collected Date_Analysed SW_Sample_Number
-## 1 Ayrshire and Arran Cumnock     19/02/2021    22/02/2021         14725793
-## 2 Ayrshire and Arran Cumnock     23/02/2021    25/02/2021         14725796
-## 3 Ayrshire and Arran Cumnock     01/03/2021    03/03/2021         14725799
-## 4 Ayrshire and Arran Cumnock     08/03/2021    10/03/2021         14739085
-## 5 Ayrshire and Arran Cumnock     15/03/2021    16/03/2021         14757657
-## 6 Ayrshire and Arran Cumnock     22/03/2021    23/03/2021         14769351</code></pre>
-<p>It is not exactly the same as our manually curated names, but it
-could be good enough for your use cases.</p>
-</div>
+<div id="number" class="section level2">
+<h2>Number</h2>
+<p>Comment what to do with the numbers, for example use summary(Ammonia)
+to cehck it all look ok, negative value would probably be wrong.</p>
+<p>Save the currated data to ../data/curated_data</p>
+<hr />
+<p>*The misspelled sites were: “Allanfearn”, “Invurie”, “Langhlm”,
+“Philiphill”, “Sheildhall”, “Stevenson”, “hatton - Fintry West”</p>
 </div>
 
 
