@@ -13,7 +13,7 @@
 
 <meta name="date" content="2022-03-12" />
 
-<title>Data wrangling with R</title>
+<title>Data wrangling with R - P1 Renaming</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -359,7 +359,7 @@ pre code {
 
 
 
-<h1 class="title toc-ignore">Data wrangling with R</h1>
+<h1 class="title toc-ignore">Data wrangling with R - P1 Renaming</h1>
 <h4 class="author">Sumy V Baby, Tomasz Zielinski</h4>
 <h4 class="date">2022-03-12</h4>
 
@@ -377,15 +377,15 @@ page</a>).</p>
 <p>Our raw data are included in the raw_data folder of this project.
 Let’s check what it contains</p>
 <pre class="r"><code>list.files(&quot;../raw_data&quot;)</code></pre>
-<pre><code>## [1] &quot;2022_02_14-RNA_Monitoring_Project.csv&quot;
-## [2] &quot;2022_02_14-Sites_coordinates.csv&quot;     
-## [3] &quot;2022_02_14-Sites_population.csv&quot;</code></pre>
+<pre><code>## [1] &quot;COVID_RNA_Monitoring.csv&quot; &quot;Sites_coordinates.csv&quot;   
+## [3] &quot;Sites_population.csv&quot;</code></pre>
 <p>*** The <code>../raw_data</code> means that we are going to navigate
 to the parent folder (we are in src folder) cause we use <code>..</code>
 and then we will list the content of the <code>raw_data</code> folder.
 ***</p>
-<p>Let’s read measurements from the RNA Monitoring Project file</p>
-<pre class="r"><code>raw_data &lt;- read.csv(&quot;../raw_data/2022_02_14-RNA_Monitoring_Project.csv&quot;)
+<p>Let’s read measurements from the COVID RNA Monitoring Project
+file</p>
+<pre class="r"><code>raw_data &lt;- read.csv(&quot;../raw_data/COVID_RNA_Monitoring.csv&quot;)
 head(raw_data)</code></pre>
 <pre><code>##     HBNAME       Site       Date Date.Analysed SW.Sample.Number N1.Description
 ## 1 Highland Allanfearn 01/06/2020       (Empty)         13953443       Negative
@@ -408,13 +408,13 @@ head(raw_data)</code></pre>
 ## 4                 NA     25228800             NA       NA                    NA
 ## 5                 NA     24537600             NA       NA                    NA
 ## 6                 NA     27820800             NA       NA                    NA
-##   Million.Gene.Copies.Per.Person.per.Day Analysis.Lab X.Row.Count.
-## 1                                      0         SEPA            1
-## 2                                      0         SEPA            1
-## 3                                      0         SEPA            1
-## 4                                      0         SEPA            1
-## 5                                      0         SEPA            1
-## 6                                      0         SEPA            1</code></pre>
+##   Million.Gene.Copies.Per.Person.per.Day Analysis.Lab
+## 1                                      0         SEPA
+## 2                                      0         SEPA
+## 3                                      0         SEPA
+## 4                                      0         SEPA
+## 5                                      0         SEPA
+## 6                                      0         SEPA</code></pre>
 <p><code>read.csv</code> read content of the file into
 <code>raw_data</code> variable.<br />
 <code>head(raw_data)</code> printed first few rows of the data.</p>
@@ -424,14 +424,14 @@ generating r-markdown report we can use:</p>
   head(raw_data),
   caption = &quot;COVID RNA levels in wastewater&quot;
 )</code></pre>
-<table style="width:100%;">
+<table>
 <caption>COVID RNA levels in wastewater</caption>
 <colgroup>
 <col width="3%" />
 <col width="3%" />
 <col width="3%" />
-<col width="4%" />
 <col width="5%" />
+<col width="6%" />
 <col width="5%" />
 <col width="6%" />
 <col width="4%" />
@@ -443,8 +443,7 @@ generating r-markdown report we can use:</p>
 <col width="5%" />
 <col width="3%" />
 <col width="7%" />
-<col width="13%" />
-<col width="4%" />
+<col width="14%" />
 <col width="4%" />
 </colgroup>
 <thead>
@@ -467,7 +466,6 @@ generating r-markdown report we can use:</p>
 <th align="right">Modelled.Flow..l.day.</th>
 <th align="right">Million.Gene.Copies.Per.Person.per.Day</th>
 <th align="left">Analysis.Lab</th>
-<th align="right">X.Row.Count.</th>
 </tr>
 </thead>
 <tbody>
@@ -490,7 +488,6 @@ generating r-markdown report we can use:</p>
 <td align="right">NA</td>
 <td align="right">0</td>
 <td align="left">SEPA</td>
-<td align="right">1</td>
 </tr>
 <tr class="even">
 <td align="left">Highland</td>
@@ -511,7 +508,6 @@ generating r-markdown report we can use:</p>
 <td align="right">NA</td>
 <td align="right">0</td>
 <td align="left">SEPA</td>
-<td align="right">1</td>
 </tr>
 <tr class="odd">
 <td align="left">Highland</td>
@@ -532,7 +528,6 @@ generating r-markdown report we can use:</p>
 <td align="right">NA</td>
 <td align="right">0</td>
 <td align="left">SEPA</td>
-<td align="right">1</td>
 </tr>
 <tr class="even">
 <td align="left">Highland</td>
@@ -553,7 +548,6 @@ generating r-markdown report we can use:</p>
 <td align="right">NA</td>
 <td align="right">0</td>
 <td align="left">SEPA</td>
-<td align="right">1</td>
 </tr>
 <tr class="odd">
 <td align="left">Highland</td>
@@ -574,7 +568,6 @@ generating r-markdown report we can use:</p>
 <td align="right">NA</td>
 <td align="right">0</td>
 <td align="left">SEPA</td>
-<td align="right">1</td>
 </tr>
 <tr class="even">
 <td align="left">Highland</td>
@@ -595,7 +588,6 @@ generating r-markdown report we can use:</p>
 <td align="right">NA</td>
 <td align="right">0</td>
 <td align="left">SEPA</td>
-<td align="right">1</td>
 </tr>
 </tbody>
 </table>
@@ -650,10 +642,10 @@ change them and set back.</p>
 <p>For that we need a vector with new names, we could generate a text
 template with a following command</p>
 <pre class="r"><code>print(paste0(&quot;&#39;&quot;, names(raw_data),&quot;&#39;&quot;, collapse=&quot;,&quot;))</code></pre>
-<pre><code>## [1] &quot;&#39;HBNAME&#39;,&#39;Site&#39;,&#39;Date&#39;,&#39;Date.Analysed&#39;,&#39;SW.Sample.Number&#39;,&#39;N1.Description&#39;,&#39;N1.Reported.Value&#39;,&#39;N1.Sample.1&#39;,&#39;N1.Sample.2&#39;,&#39;N1.Sample.3&#39;,&#39;Calculated.Mean&#39;,&#39;Standard.Deviation&#39;,&#39;Flow..l.day.&#39;,&#39;Ammonia..mg.l.&#39;,&#39;pH.Value&#39;,&#39;Modelled.Flow..l.day.&#39;,&#39;Million.Gene.Copies.Per.Person.per.Day&#39;,&#39;Analysis.Lab&#39;,&#39;X.Row.Count.&#39;&quot;</code></pre>
+<pre><code>## [1] &quot;&#39;HBNAME&#39;,&#39;Site&#39;,&#39;Date&#39;,&#39;Date.Analysed&#39;,&#39;SW.Sample.Number&#39;,&#39;N1.Description&#39;,&#39;N1.Reported.Value&#39;,&#39;N1.Sample.1&#39;,&#39;N1.Sample.2&#39;,&#39;N1.Sample.3&#39;,&#39;Calculated.Mean&#39;,&#39;Standard.Deviation&#39;,&#39;Flow..l.day.&#39;,&#39;Ammonia..mg.l.&#39;,&#39;pH.Value&#39;,&#39;Modelled.Flow..l.day.&#39;,&#39;Million.Gene.Copies.Per.Person.per.Day&#39;,&#39;Analysis.Lab&#39;&quot;</code></pre>
 <p>We used ’ so that the escape &quot; character won’t be printed Now we can
 edit the columns ones by one and use to set the new names</p>
-<pre class="r"><code>new_name = c(&#39;Health_Board&#39;,&#39;Site&#39;,&#39;Date_collected&#39;,&#39;Date_analysed&#39;,&#39;SW_sample_number&#39;,&#39;N1.Description&#39;,&#39;N1.Reported.Value&#39;,&#39;N1.Sample.1&#39;,&#39;N1.Sample.2&#39;,&#39;N1.Sample.3&#39;,&#39;Calculated.Mean&#39;,&#39;Standard.Deviation&#39;,&#39;Flow..l.day.&#39;,&#39;Ammonia..mg.l.&#39;,&#39;pH.Value&#39;,&#39;Modelled.Flow..l.day.&#39;,&#39;Million.Gene.Copies.Per.Person.per.Day&#39;,&#39;Analysis.Lab&#39;,&#39;X.Row.Count.&#39;)
+<pre class="r"><code>new_name = c(&#39;Health_Board&#39;,&#39;Site&#39;,&#39;Date_collected&#39;,&#39;Date_analysed&#39;,&#39;SW_sample_number&#39;,&#39;N1.Description&#39;,&#39;N1.Reported.Value&#39;,&#39;N1.Sample.1&#39;,&#39;N1.Sample.2&#39;,&#39;N1.Sample.3&#39;,&#39;Calculated.Mean&#39;,&#39;Standard.Deviation&#39;,&#39;Flow..l.day.&#39;,&#39;Ammonia..mg.l.&#39;,&#39;pH.Value&#39;,&#39;Modelled.Flow..l.day.&#39;,&#39;Million.Gene.Copies.Per.Person.per.Day&#39;,&#39;Analysis.Lab&#39;)
 renamed_data &lt;- raw_data
 names(renamed_data) = new_name
 head(renamed_data[1:5])</code></pre>
@@ -690,9 +682,9 @@ dictionary.</p>
 the mappings from there. Try to do it yourself.</p>
 <p>So lets rename all the columns using two lists of names</p>
 <pre class="r"><code>dictionary &lt;- data.frame(
-  old_name = c(&#39;HBNAME&#39;,&#39;Site&#39;,&#39;Date&#39;,&#39;Date.Analysed&#39;,&#39;SW.Sample.Number&#39;,&#39;N1.Description&#39;,&#39;N1.Reported.Value&#39;,&#39;N1.Sample.1&#39;,&#39;N1.Sample.2&#39;,&#39;N1.Sample.3&#39;,&#39;Calculated.Mean&#39;,&#39;Standard.Deviation&#39;,&#39;Flow..l.day.&#39;,&#39;Ammonia..mg.l.&#39;,&#39;pH.Value&#39;,&#39;Modelled.Flow..l.day.&#39;,&#39;Million.Gene.Copies.Per.Person.per.Day&#39;,&#39;Analysis.Lab&#39;,&#39;X.Row.Count.&#39;),
+  old_name = c(&#39;HBNAME&#39;,&#39;Site&#39;,&#39;Date&#39;,&#39;Date.Analysed&#39;,&#39;SW.Sample.Number&#39;,&#39;N1.Description&#39;,&#39;N1.Reported.Value&#39;,&#39;N1.Sample.1&#39;,&#39;N1.Sample.2&#39;,&#39;N1.Sample.3&#39;,&#39;Calculated.Mean&#39;,&#39;Standard.Deviation&#39;,&#39;Flow..l.day.&#39;,&#39;Ammonia..mg.l.&#39;,&#39;pH.Value&#39;,&#39;Modelled.Flow..l.day.&#39;,&#39;Million.Gene.Copies.Per.Person.per.Day&#39;,&#39;Analysis.Lab&#39;),
 
-  new_name = c(&quot;Health_Board&quot;,&quot;Site&quot;,&quot;Date_collected&quot;,&quot;Date_analysed&quot;, &quot;SW_sample_number&quot;,&quot;N1_description&quot;, &quot;N1_Reported_value-gc_per_L&quot;,&quot;N1_Repl_1-gc_per_L&quot;,&quot;N1_Repl_2-gc_per_L&quot;,&quot;N1_Repl_3-gc_per_L&quot;,&quot;Calculated_mean&quot;,&quot;Standard_Deviation&quot;,&quot;Flow-L_per_day&quot;,&quot;Ammonia-mg_per_L&quot;,&quot;pH_value&quot;,&quot;Modelled_flow-L_per_day&quot;,&quot;Million_gene_copies_per_person_per_day&quot;,&quot;Analysis_lab&quot;,&quot;Row_count&quot;)
+  new_name = c(&quot;Health_Board&quot;,&quot;Site&quot;,&quot;Date_collected&quot;,&quot;Date_analysed&quot;, &quot;SW_sample_number&quot;,&quot;N1_description&quot;, &quot;N1_Reported_value-gc_per_L&quot;,&quot;N1_Repl_1-gc_per_L&quot;,&quot;N1_Repl_2-gc_per_L&quot;,&quot;N1_Repl_3-gc_per_L&quot;,&quot;Calculated_mean&quot;,&quot;Standard_Deviation&quot;,&quot;Flow-L_per_day&quot;,&quot;Ammonia-mg_per_L&quot;,&quot;pH_value&quot;,&quot;Modelled_flow-L_per_day&quot;,&quot;Million_gene_copies_per_person_per_day&quot;,&quot;Analysis_lab&quot;)
 )
 renamed_data &lt;- raw_data
 names(renamed_data)[match(dictionary$old_name, names(renamed_data))] &lt;- dictionary$new_name
@@ -745,8 +737,7 @@ what” and “Where”.</p>
 ## [15] &quot;_H.Value&quot;                              
 ## [16] &quot;_odelled.Flow..l.day.&quot;                 
 ## [17] &quot;_illion.Gene.Copies.Per.Person.per.Day&quot;
-## [18] &quot;_nalysis.Lab&quot;                          
-## [19] &quot;_.Row.Count.&quot;</code></pre>
+## [18] &quot;_nalysis.Lab&quot;</code></pre>
 <p>OK that does not look good, it is cause ‘.’ means any character, so
 every starting letter was replaced with _. We need to “escape” the ‘.’,
 using \ which says it is just a . character</p>
@@ -768,8 +759,7 @@ using \ which says it is just a . character</p>
 ## [15] &quot;pH_Value&quot;                              
 ## [16] &quot;Modelled_Flow..l.day.&quot;                 
 ## [17] &quot;Million_Gene.Copies.Per.Person.per.Day&quot;
-## [18] &quot;Analysis_Lab&quot;                          
-## [19] &quot;X_Row.Count.&quot;</code></pre>
+## [18] &quot;Analysis_Lab&quot;</code></pre>
 <p>That worked, but only for the first ., we need gsub</p>
 <pre class="r"><code>gsub(&quot;\\.&quot;,&quot;_&quot;,names(raw_data))</code></pre>
 <pre><code>##  [1] &quot;HBNAME&quot;                                
@@ -789,8 +779,7 @@ using \ which says it is just a . character</p>
 ## [15] &quot;pH_Value&quot;                              
 ## [16] &quot;Modelled_Flow__l_day_&quot;                 
 ## [17] &quot;Million_Gene_Copies_Per_Person_per_Day&quot;
-## [18] &quot;Analysis_Lab&quot;                          
-## [19] &quot;X_Row_Count_&quot;</code></pre>
+## [18] &quot;Analysis_Lab&quot;</code></pre>
 <p>If we look at 13, ‘Flow_<em>l_day</em>’ looks weird it is cause it
 was ‘Flow..l.day.’ with two dots. We can tell gsup to match multiple
 consecutive appearence of a character with + (which means at least 1),
@@ -813,8 +802,7 @@ or * which means (0 or many)</p>
 ## [15] &quot;pH_Value&quot;                              
 ## [16] &quot;Modelled_Flow_l_day_&quot;                  
 ## [17] &quot;Million_Gene_Copies_Per_Person_per_Day&quot;
-## [18] &quot;Analysis_Lab&quot;                          
-## [19] &quot;X_Row_Count_&quot;</code></pre>
+## [18] &quot;Analysis_Lab&quot;</code></pre>
 <p>Now the only annoying part is the last, handing _</p>
 <p>We can match the end of word with $ sign, so we can replace only the
 last occurence. For example,</p>
@@ -836,8 +824,7 @@ last occurence. For example,</p>
 ## [15] &quot;pH.Value&quot;                              
 ## [16] &quot;Modelled.Flow..l.dayZZZ&quot;               
 ## [17] &quot;Million.Gene.Copies.Per.Person.per.Day&quot;
-## [18] &quot;Analysis.Lab&quot;                          
-## [19] &quot;X.Row.CountZZZ&quot;</code></pre>
+## [18] &quot;Analysis.Lab&quot;</code></pre>
 <p>Attached ZZZ to the last ., what we want is replacing the last . with
 empty string “”</p>
 <pre class="r"><code>gsub(&quot;\\.$&quot;,&quot;&quot;,names(raw_data))</code></pre>
@@ -858,8 +845,7 @@ empty string “”</p>
 ## [15] &quot;pH.Value&quot;                              
 ## [16] &quot;Modelled.Flow..l.day&quot;                  
 ## [17] &quot;Million.Gene.Copies.Per.Person.per.Day&quot;
-## [18] &quot;Analysis.Lab&quot;                          
-## [19] &quot;X.Row.Count&quot;</code></pre>
+## [18] &quot;Analysis.Lab&quot;</code></pre>
 <p>We can chain our two operations (it is called pipe) by using
 <code>%&gt;%</code></p>
 <pre class="r"><code>library(magrittr)
@@ -881,8 +867,7 @@ gsub(&quot;\\.$&quot;,&quot;&quot;,names(raw_data)) %&gt;% gsub(&quot;\\.+&quot;
 ## [15] &quot;pH_Value&quot;                              
 ## [16] &quot;Modelled_Flow_l_day&quot;                   
 ## [17] &quot;Million_Gene_Copies_Per_Person_per_Day&quot;
-## [18] &quot;Analysis_Lab&quot;                          
-## [19] &quot;X_Row_Count&quot;</code></pre>
+## [18] &quot;Analysis_Lab&quot;</code></pre>
 <p>The first gsub removed the last ., the second replaced other .(.)
 with _ Look like in the second gsub we passed the “Where” using . as
 argument, it means that the output of first gsub was passed to the
