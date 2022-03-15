@@ -20,8 +20,7 @@ Firstly, read our renamed data.
 ## Inspecting DATA
 
 ```{r}
-library(dplyr)
-renamed_data <- read.csv("../data/renamed_data.csv")
+library(dplyr <- read.csv("../data/renamed_data.csv")
 glimpse(renamed_data)
 
 ```
@@ -40,6 +39,33 @@ sites = renamed_data$Site
 sites = sort(unique(sites))
 sites
 
+```
+# Counting the measurements for each sites
+
+We will first use the 'aggregate' function in base R to count the occurence of each site
+```{r}
+aggregate(renamed_data$Site, by=list(renamed_data$Site), FUN=length) -> site_count
+site_count
+```
+We can also use the group_by function fom thr library dplyr
+```{r}
+library (dplyr)
+renamed_data %>% group_by(Site) %>% summarize("Count" = n())  -> site_count
+site_count
+```
+# Filter out the wrong sites
+Next we need to filter out the wrong sites. The sites: "Nigg - Aberdeen RI" and "Philipshill - Hairmyres Hospital" are excluded as these found to be genuine.
+```{r}
+library (dplyr)
+filter(c, Count <5 , Site != "Nigg - Aberdeen RI", Site != "Philipshill - Hairmyres Hospital" )-> wrong_sites
+wrong_sites
+```
+# Use a dictionary to replace the mispelled names
+
+```{r}
+dictionary <- data.frame(old_name = c("Allanfearn ", "Carbarn","Fort William ","Galashiels ","hatton - Fintry West", "Invurie", "Langhlm","Perth ","Philiphill","Sheildhall","Stevenson","Stevenson - Stevenston West"),new_name = c("Allanfearn", "Carbarns","Fort William","Galashiels","Hatton - Fintry West","Inverurie","Langholm","Perth","Philipshill","Shieldhall","Stevenston","Stevenston - Stevenston West"))
+curated_data <- renamed_data
+curated_data$Site[match(dictionary$old_name, curated_data$Site)] <- dictionary$new_name
 ```
 There are **7**, sites with close but not identical names.  
 One differs by having a space after the name.
