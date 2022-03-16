@@ -20,7 +20,8 @@ Firstly, read our renamed data.
 ## Inspecting DATA
 
 ```{r}
-library(dplyr <- read.csv("../data/renamed_data.csv")
+library(dplyr)
+renamed_data<- read.csv("../data/renamed_data.csv")
 glimpse(renamed_data)
 
 ```
@@ -40,33 +41,6 @@ sites = sort(unique(sites))
 sites
 
 ```
-# Counting the measurements for each sites
-
-We will first use the 'aggregate' function in base R to count the occurence of each site
-```{r}
-aggregate(renamed_data$Site, by=list(renamed_data$Site), FUN=length) -> site_count
-site_count
-```
-We can also use the group_by function fom thr library dplyr
-```{r}
-library (dplyr)
-renamed_data %>% group_by(Site) %>% summarize("Count" = n())  -> site_count
-site_count
-```
-# Filter out the wrong sites
-Next we need to filter out the wrong sites. The sites: "Nigg - Aberdeen RI" and "Philipshill - Hairmyres Hospital" are excluded as these found to be genuine.
-```{r}
-library (dplyr)
-filter(c, Count <5 , Site != "Nigg - Aberdeen RI", Site != "Philipshill - Hairmyres Hospital" )-> wrong_sites
-wrong_sites
-```
-# Use a dictionary to replace the mispelled names
-
-```{r}
-dictionary <- data.frame(old_name = c("Allanfearn ", "Carbarn","Fort William ","Galashiels ","hatton - Fintry West", "Invurie", "Langhlm","Perth ","Philiphill","Sheildhall","Stevenson","Stevenson - Stevenston West"),new_name = c("Allanfearn", "Carbarns","Fort William","Galashiels","Hatton - Fintry West","Inverurie","Langholm","Perth","Philipshill","Shieldhall","Stevenston","Stevenston - Stevenston West"))
-curated_data <- renamed_data
-curated_data$Site[match(dictionary$old_name, curated_data$Site)] <- dictionary$new_name
-```
 There are **7**, sites with close but not identical names.  
 One differs by having a space after the name.
 
@@ -85,31 +59,155 @@ In order to do it .....
 ...
 ...
 
+# Counting the measurements for each sites
 
-## The factors variables
+We will first use the 'aggregate' function in base R to count the occurence of each site
+```{r}
+aggregate(renamed_data$Site, by=list(renamed_data$Site), FUN=length) -> site_count
+site_count
+```
+We can also use the group_by function from the library dplyr
 
-Factors are variables that have only limitted set of options. 
-In our case N1_description is such a variable, as it describes
-the virust leves as Negative, Weak Poistive, Postives etc.
+```{r}
+library (dplyr)
+renamed_data %>% group_by(Site) %>% summarize("Count" = n())  -> site_count
+site_count
+```
+# Filter out the wrong sites
 
-.... now the code to convert to factors and find the wrong factors.
-((I change few descriptions to be misspelled (wrong letter size, mispelling or other key workd)))
+Next we need to filter out the wrong sites. The sites: "Nigg - Aberdeen RI" and "Philipshill - Hairmyres Hospital" are excluded as these found to be genuine.
+
+```{r}
+library (dplyr)
+filter(site_count, Count <5 , Site != "Nigg - Aberdeen RI", Site != "Philipshill - Hairmyres Hospital" )-> wrong_sites
+wrong_sites
+```
+
+# Replace the wrong sites
+##Use a dictionary to replace the misspelled names
+
+Lets try to use a dictionary to replace the wrong names
+```{r}
+dictionary <- data.frame(old_name = c("Allanfearn ", "Carbarn","Fort William ","Galashiels ","hatton - Fintry West", "Invurie", "Langhlm","Perth ","Philiphill","Sheildhall","Stevenson","Stevenson - Stevenston West"),new_name = c("Allanfearn", "Carbarns","Fort William","Galashiels","Hatton - Fintry West","Inverurie","Langholm","Perth","Philipshill","Shieldhall","Stevenston","Stevenston - Stevenston West"))
+curated_data <- renamed_data
+curated_data$Site[match(dictionary$old_name, curated_data$Site)] <-dictionary$new_name
+```
 
 
-Show how to easily find them, fix and convert to factors
+Now let's run again determine the count of each distinct site
 
+```{r}
+library (dplyr)
+curated_data %>% group_by(Site) %>% summarize("Count" = n())  -> site_count
+filter(site_count, Count <5 , Site != "Nigg - Aberdeen RI", Site != "Philipshill - Hairmyres Hospital" )-> wrong_sites
+wrong_sites
+```
+We can see from the above table that only the first match is replaced as the count is now reduced by one. The Site "hatton - Fintry West", "Invurie", "Langhlm", "Philiphil", and "Sheildhall" is repeating more than one time. So that causes the issue
+Lets try to run the code again by repeating the original number of occurences 
+
+```{r}
+dictionary <- data.frame(old_name = c("Allanfearn ", "Carbarn","Fort William ","Galashiels ","hatton - Fintry West","hatton - Fintry West", "Invurie", "Invurie","Invurie","Invurie","Langhlm", "Langhlm", "Langhlm", "Langhlm","Perth ","Philiphill", "Philiphill","Sheildhall","Sheildhall","Stevenson","Stevenson","Stevenson","Stevenson - Stevenston West"),new_name = c("Allanfearn", "Carbarns","Fort William","Galashiels","Hatton - Fintry West","Hatton - Fintry West","Inverurie","Inverurie","Inverurie","Inverurie","Langholm","Langholm","Langholm","Langholm","Perth","Philipshill","Philipshill","Shieldhall","Shieldhall","Stevenston","Stevenston","Stevenston","Stevenston - Stevenston West"))
+curated_data <- renamed_data
+curated_data$Site[match(dictionary$old_name, curated_data$Site)] <-dictionary$new_name
+```
+Lets now find out the wrong sites if any exists now
+
+```{r}
+library (dplyr)
+curated_data %>% group_by(Site) %>% summarize("Count" = n())  -> site_count
+filter(site_count, Count <5 , Site != "Nigg - Aberdeen RI", Site != "Philipshill - Hairmyres Hospital" )-> wrong_sites
+wrong_sites
+```
+We can see the dictionary approach is not helpful to replace all the matches. Let's try with recode function in dplyr library
+
+```{r}
+library (dplyr)
+curated_data <- renamed_data
+curated_data$Site <-
+  recode(curated_data$Site, "Allanfearn "= "Allanfearn", "Carbarn"="Carbarns" ,"Fort William "="Fort William","Galashiels "="Galashiels","hatton - Fintry West" = "Hatton - Fintry West", "Invurie"="Inverurie", "Langhlm"="Langholm","Perth "="Perth","Philiphill"="Philipshill","Sheildhall"="Shieldhall","Stevenson"="Stevenston","Stevenson - Stevenston West"="Stevenston - Stevenston West")
+```
+Lets now find out the wrong sites if any exists now
+
+```{r}
+library (dplyr)
+curated_data %>% group_by(Site) %>% summarize("Count" = n())  -> site_count
+site_count
+filter(site_count, Count <5 , Site != "Nigg - Aberdeen RI", Site != "Philipshill - Hairmyres Hospital" )-> wrong_sites
+wrong_sites
+```
+So we have got now 162 sites which are corrected and good to go forward!
+
+# The factors variables
+
+Now lets check whether N1_Description column shows doesn't have any misspelled values and check the levels to find any misspelled description. We can convert the N1.Description column as factor.Factors are variables that have only limited set of options. In our case N1_description is such a variable, as it describes the virus levels as Negative, Weak Positive, Positive, Positive(DNQ).
+
+Using base R
+
+```{r}
+Factor  = as.factor(curated_data$N1.Description)
+levels(Factor)
+```
+As we can clearly see from the above printed result, "neg","negative" and "Possitive" are the misspelled description. We can use the recode function again to replace all these.
+
+```{r}
+library (dplyr)
+curated_data$N1.Description <-recode(curated_data$N1.Description,"negative" = "Negative", "neg" = "Negative", "Possitive"="Positive") 
+```
+
+Now lets check again whether it's changed
+
+```{r}
+Factor  = as.factor(curated_data$N1.Description)
+levels(Factor)
+```
+We can see only 5 levels which are right. So the Description have been corrected to right ones and we are good to go
 
 ## Dates
+We will now convert the dates in to iso format.
 
-Convert to dates, represent in iso format, find the wrong date by sorting or min max (the 1899),
-fix it.
+```{r}
+library(lubridate)
+curated_data$Date_analysed<- dmy(curated_data$Date_analysed) #Change the date format to YYYY-MM-DD
+curated_data$Date_collected<- dmy(curated_data$Date_collected) #Change the date format to YYYY-MM-DD
+curated_data
+```
 
-## Number
-Comment what to do with the numbers, for example use summary(Ammonia) to cehck it all look ok, 
-negative value would probably be wrong.
+We can see some warnings because the Date_analysed column contains null values. Those warnings can be ignored.
 
+As we know the data is collected from the year 2020 to 2022 we will now look for any dates which are out of range and needs to be changed.
 
-Save the currated data to ../data/curated_data
+```{r}
+curated_data[curated_data$Date_collected < "2020-01-01", ]
+```
+As you can see this one record has a wrong date which needs to be replaced with "2022-02-09"
+Lets do that by using recode. Recode cannot work with date format. So we need to convert it as character before passing it to the recode function
+
+```{r}
+library (dplyr)
+curated_data$Date_collected <- as.character(curated_data$Date_collected)
+curated_data$Date_collected<-recode(curated_data$Date_collected,"1899-12-31" ="2022-02-09") 
+```
+
+# Number
+Now we can check for the summary of  data value column to find if any values are negative 
+```{r}
+
+summary(select(curated_data,N1.Reported.Value,N1.Sample.1,N1.Sample.2,N1.Sample.3,Calculated.Mean,Standard.Deviation,Flow..l.day.,Ammonia..mg.l., pH.Value,Modelled.Flow..l.day.,Million.Gene.Copies.Per.Person.per.Day))
+```
+We can see that summary statistics of all the data columns are positive
+
+Let's save our renamed data into a file.
+
+```{r}
+if (!file.exists('../data')) {
+  dir.create(file.path('..', 'data'))  
+}
+
+fName = '../data/curated_data.csv'
+write.csv(curated_data, fName, row.names = FALSE)
+
+```
+We first checked if the output directory exists, if not create it and then we saved the file.
 
 
 ------------
