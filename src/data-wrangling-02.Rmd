@@ -190,6 +190,7 @@ curated_data$Date_collected<- dmy(curated_data$Date_collected) #Change the date 
 glimpse(curated_data)
 ```
 Note: We can see some warnings because the Date_analysed column contains null values. Those warnings can be ignored.
+
 ## Correct any wrong date value
 Let's now look at the date ranges by sorting the data according to the ascending order of Date_collected
 ```{r}
@@ -213,8 +214,33 @@ summary(select(curated_data,N1_Reported_value.gc_per_L,N1_Repl_1.gc_per_L ,N1_Re
 ```
 We can see that summary statistics of all the data columns are positive
 
-Let's save our renamed data into a file.
+# Adding missing Health Board information
 
+Let's sort the curated data by Site names and print out the distinct Health board and Site combinations
+
+```{r}
+
+curated_data <- curated_data[order(curated_data$Site),]
+glimpse(unique(select(curated_data,Health_Board,Site)))
+```
+Here we can clearly see that many sites are having missing Health board information. For example the site: "Allers - St Leonards" is having Health board entered as "(Empty)" but the actual Health board is "Lanakshire" the same one as for "Allers". As the Sites are sorted alphabetically , now we can write a code to fill in the missing Health board information corresponding to each site.
+
+```{r}
+for (i in 1:10316) {ifelse (curated_data$Health_Board[i] != "(Empty)", x <- curated_data$Health_Board[i],curated_data$Health_Board[i]<-x)}
+```
+
+For each row, if the value of the Health board is there it is kept as such but if it is missing, it is populated from preceding non empty health board information. 
+
+The for statement is for looping through each row(there are 10316 rows here). While looping through each row, if the value of the health board is not "(Empty)", the value is stored in to a variable x and whenever the Health board value is "(Empty)" the value stored in the variable is used to replace it. 
+
+Lets try to print again the unique Health board and Site combination to know whether the problem is fixed
+
+```{r}
+glimpse(unique(select(curated_data,Health_Board,Site)))
+```
+Here we can see that the missing health boards have been filled
+
+Let's save our curated data into a file.
 ```{r}
 if (!file.exists('../data')) {
   dir.create(file.path('..', 'data'))  

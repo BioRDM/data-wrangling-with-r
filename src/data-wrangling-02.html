@@ -518,7 +518,11 @@ glimpse(curated_data)</code></pre>
 ## $ Million_gene_copies_per_person_per_day &lt;dbl&gt; 119.42, 53.98, 19.91, 7.22, 11.…
 ## $ Analysis_lab                           &lt;chr&gt; &quot;SEPA&quot;, &quot;SEPA&quot;, &quot;SEPA&quot;, &quot;SEPA&quot;,…
 ## $ Row_Count                              &lt;int&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1…</code></pre>
-<p>Note: We can see some warnings because the Date_analysed column contains null values. Those warnings can be ignored. ## Correct any wrong date value Let’s now look at the date ranges by sorting the data according to the ascending order of Date_collected</p>
+<p>Note: We can see some warnings because the Date_analysed column contains null values. Those warnings can be ignored.</p>
+</div>
+<div id="correct-any-wrong-date-value" class="section level2">
+<h2>Correct any wrong date value</h2>
+<p>Let’s now look at the date ranges by sorting the data according to the ascending order of Date_collected</p>
 <pre class="r"><code>glimpse(curated_data[order(curated_data$Date_collected),]$Date_collected)</code></pre>
 <pre><code>##  Date[1:10316], format: &quot;1899-12-31&quot; &quot;2020-05-28&quot; &quot;2020-05-28&quot; &quot;2020-05-28&quot; &quot;2020-05-28&quot; ...</code></pre>
 <pre class="r"><code>glimpse(curated_data[order(curated_data$Date_analysed),]$Date_analysed)</code></pre>
@@ -565,7 +569,28 @@ glimpse(curated_data)</code></pre>
 ##  Max.   :23570.760                     
 ##  NA&#39;s   :733</code></pre>
 <p>We can see that summary statistics of all the data columns are positive</p>
-<p>Let’s save our renamed data into a file.</p>
+</div>
+<div id="adding-missing-health-board-information" class="section level1">
+<h1>Adding missing Health Board information</h1>
+<p>Let’s sort the curated data by Site names and print out the distinct Health board and Site combinations</p>
+<pre class="r"><code>curated_data &lt;- curated_data[order(curated_data$Site),]
+glimpse(unique(select(curated_data,Health_Board,Site)))</code></pre>
+<pre><code>## Rows: 172
+## Columns: 2
+## $ Health_Board &lt;chr&gt; &quot;Highland&quot;, &quot;(Empty)&quot;, &quot;Lanarkshire&quot;, &quot;(Empty)&quot;, &quot;Forth V…
+## $ Site         &lt;chr&gt; &quot;Allanfearn&quot;, &quot;Allanfearn&quot;, &quot;Allers&quot;, &quot;Allers - St Leonar…</code></pre>
+<p>Here we can clearly see that many sites are having missing Health board information. For example the site: “Allers - St Leonards” is having Health board entered as “(Empty)” but the actual Health board is “Lanakshire” the same one as for “Allers”. As the Sites are sorted alphabetically , now we can write a code to fill in the missing Health board information corresponding to each site.</p>
+<pre class="r"><code>for (i in 1:10316) {ifelse (curated_data$Health_Board[i] != &quot;(Empty)&quot;, x &lt;- curated_data$Health_Board[i],curated_data$Health_Board[i]&lt;-x)}</code></pre>
+<p>For each row, if the value of the Health board is there it is kept as such but if it is missing, it is populated from preceding non empty health board information.</p>
+<p>The for statement is for looping through each row(there are 10316 rows here). While looping through each row, if the value of the health board is not “(Empty)”, the value is stored in to a variable x and whenever the Health board value is “(Empty)” the value stored in the variable is used to replace it.</p>
+<p>Lets try to print again the unique Health board and Site combination to know whether the problem is fixed</p>
+<pre class="r"><code>glimpse(unique(select(curated_data,Health_Board,Site)))</code></pre>
+<pre><code>## Rows: 162
+## Columns: 2
+## $ Health_Board &lt;chr&gt; &quot;Highland&quot;, &quot;Lanarkshire&quot;, &quot;Lanarkshire&quot;, &quot;Forth Valley&quot;,…
+## $ Site         &lt;chr&gt; &quot;Allanfearn&quot;, &quot;Allers&quot;, &quot;Allers - St Leonards&quot;, &quot;Alloa&quot;, …</code></pre>
+<p>Here we can see that the missing health boards have been filled</p>
+<p>Let’s save our curated data into a file.</p>
 <pre class="r"><code>if (!file.exists(&#39;../data&#39;)) {
   dir.create(file.path(&#39;..&#39;, &#39;data&#39;))  
 }

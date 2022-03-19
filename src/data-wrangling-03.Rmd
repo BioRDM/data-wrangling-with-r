@@ -1,0 +1,18 @@
+---
+title: "Data wrangling with R - P2 Data Curation"
+author: "Sumy V Baby, Tomasz Zielinski"
+date: "2022-03-12"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+We continue our work with the data, now we will focus on actual data entries.
+
+We are going to fix some of the typical problems with real data.
+
+This and the following R-Markdown notebooks have been inspired by our real data curation work for the project about monitoring COVID virus levels in waste water around Scotland ([see project page](https://biordm.github.io/COVID-Wastewater-Scotland/)).
+
+
