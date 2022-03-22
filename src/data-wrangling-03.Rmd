@@ -9,10 +9,108 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-We continue our work with the data, now we will focus on actual data entries.
+We continue our work with the data, now we will focus on the site coordinate file.
 
 We are going to fix some of the typical problems with real data.
 
 This and the following R-Markdown notebooks have been inspired by our real data curation work for the project about monitoring COVID virus levels in waste water around Scotland ([see project page](https://biordm.github.io/COVID-Wastewater-Scotland/)).
 
+Firstly,  we will read our site coordinates data and check the number of rows
 
+```{r}
+site_data <- read.csv("../raw_data/Sites_coordinates.csv")
+nrow(site_data)
+
+```
+Now we can read the unique site names in curated data file and check for the number of sites.
+
+```{r}
+curated_data <- read.csv("../data/curated_data.csv")
+site_unique<-unique(select(curated_data,Health_Board,Site))
+nrow(site_unique)
+
+```
+
+Clearly we can see a mismatch. The site coordinates file which we have is not complete. So we need to add the missing sites. Lets find now which all sites are missing from the Sites_coordinates.csv file.
+
+Lets have a look in to the Sites_coordinates.csv file
+
+```{r}
+head(site_data)
+```
+We need to firstly change the column names in to standard format. Let's use a dictionary for this.
+
+```{r}
+dictionary <- data.frame(
+  old_name = c("Health.Area","Site.Name","Lat","Long"),
+  new_name = c("Health_Board","Site","Latitude_dd","Longitude_dd")
+)
+renamed_site_data <- site_data
+names(renamed_site_data)[match(dictionary$old_name, names(renamed_site_data))] <- dictionary$new_name
+head(renamed_site_data)
+```
+Now we can inspect which sites are missing from the two files. Lets use anti_join function from dplr package
+
+
+```{r}
+library(dplyr)
+anti_join(renamed_site_data,site_unique, by = "Site")
+
+sites_extra <- anti_join(site_unique,renamed_site_data, by = "Site")
+sites_extra
+```
+The first table shows the list of sites which are present in the Site_Coordinates file but absent in the curated data site lists. So these are misspelled sites and needs to be removed. The second table shows the sites in curated data but not in Site coordinates file. So we can see that these are the sites that needs to be added to the coordinates file.
+
+Lets now inspect more the second list ie. the sites that are in the curated data but not in the site coordinates file
+```{r}
+
+glimpse(grep("-", unlist(sites_extra$Site), value = TRUE))
+glimpse(grep("-", unlist(sites_extra$Site), value = TRUE,invert = T))
+```
+The grep function in R with the option "value=TRUE" returns all the paces which has "-" in it. The second grep function here with "invert =T" added returns the places without any "-" symbol in it
+
+The first list shows the sites which defines some subregions of already available sites in the Sites_Coordinates.csv file. For example, Allers is a site present in the coordinate file. So we can figure out that the same Latitude and longitude values can be used for these subregions.
+The sites "Oban" and "Dunoon" are not part of any other main site. So the coordinate information needs to be added.
+
+We need to do three things for curation of the coordinate file.
+1. Remove the mispelled sites from renamed_site_data
+2. Add the missing coordinate information for "Oban" and "Dunoon"
+3. Add the missing coordinate details for missing sites with "-"
+
+```{r}
+renamed_site_data <- subset(renamed_site_data, renamed_site_data$Health_Board != "(Empty)")
+sites_merged <- merge(site_unique,select(renamed_site_data,Site,Latitude_dd,Longitude_dd), by = 'Site', all=TRUE)
+
+```
+First we are removing the sites which are misspelled in the coordinate file and then we merge them to the sites in the curated data file. Merge function adds all the sites which are missing in the coordinate file.
+
+Now we need to add the coordinates for "Oban" and "Dunoon". 
+
+```{r}
+sites_merged[which(sites_merged$Site == "Oban"), ] <-c("Oban","Highland",730176.21,185987.87)
+sites_merged[which(sites_merged$Site == "Dunoon"), ] <- c("Dunoon","Highland",676972.15,217390.1) 
+
+```
+We will now add the missing coordinate information for all the other sites 
+
+```{r}
+sites_merged<- sites_merged[order(sites_merged$Site),]
+for (i in 1:162) {ifelse (is.na(sites_merged$Latitude_dd[i]),sites_merged$Latitude_dd[i]<-y, y <- sites_merged$Latitude_dd[i])}
+for (i in 1:162) {ifelse (is.na(sites_merged$Longitude_dd[i]),sites_merged$Longitude_dd[i]<-x, x <- sites_merged$Longitude_dd[i])}
+head(sites_merged)
+```
+The file is looking fine. Lets rearrange the columns so that Health board is coming first
+```{r}
+sites_merged <- select(sites_merged,Health_Board,Site,Latitude_dd,Longitude_dd)
+head(sites_merged)
+```
+Let's save our curated site coordinate data into a file.
+
+```{r}
+if (!file.exists('../data')) {
+  dir.create(file.path('..', 'data'))  
+}
+
+fName = '../data/curated_site_coordinate_data.csv'
+write.csv(sites_merged, fName, row.names = FALSE)
+```
