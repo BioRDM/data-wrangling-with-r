@@ -1,7 +1,7 @@
 ---
 title: "Data wrangling with R - P2 Data Curation"
 author: "Sumy V Baby, Tomasz Zielinski"
-date: "2022-03-12"
+date: "2022-03-22"
 output: html_document
 ---
 
@@ -25,6 +25,7 @@ nrow(site_data)
 Now we can read the unique site names in curated data file and check for the number of sites.
 
 ```{r}
+library(dplyr)
 curated_data <- read.csv("../data/curated_data.csv")
 site_unique<-unique(select(curated_data,Health_Board,Site))
 nrow(site_unique)
@@ -49,7 +50,7 @@ renamed_site_data <- site_data
 names(renamed_site_data)[match(dictionary$old_name, names(renamed_site_data))] <- dictionary$new_name
 head(renamed_site_data)
 ```
-Now we can inspect which sites are missing from the two files. Lets use anti_join function from dplr package
+Now we can inspect which sites are missing from the two files. Lets use anti_join function from dplyr package
 
 
 ```{r}
@@ -67,7 +68,7 @@ Lets now inspect more the second list ie. the sites that are in the curated data
 glimpse(grep("-", unlist(sites_extra$Site), value = TRUE))
 glimpse(grep("-", unlist(sites_extra$Site), value = TRUE,invert = T))
 ```
-The grep function in R with the option "value=TRUE" returns all the paces which has "-" in it. The second grep function here with "invert =T" added returns the places without any "-" symbol in it
+The grep function in R with the option "value=TRUE" returns all the sites which has "-" in it. The second grep function here with "invert =T" added returns the sites without any "-" symbol in it
 
 The first list shows the sites which defines some subregions of already available sites in the Sites_Coordinates.csv file. For example, Allers is a site present in the coordinate file. So we can figure out that the same Latitude and longitude values can be used for these subregions.
 The sites "Oban" and "Dunoon" are not part of any other main site. So the coordinate information needs to be added.
@@ -99,8 +100,9 @@ for (i in 1:162) {ifelse (is.na(sites_merged$Latitude_dd[i]),sites_merged$Latitu
 for (i in 1:162) {ifelse (is.na(sites_merged$Longitude_dd[i]),sites_merged$Longitude_dd[i]<-x, x <- sites_merged$Longitude_dd[i])}
 head(sites_merged)
 ```
-The file is looking fine. Lets rearrange the columns so that Health board is coming first
+The file is looking fine. Let's rearrange the columns so that Health board is arranged as first column
 ```{r}
+library(dplyr)
 sites_merged <- select(sites_merged,Health_Board,Site,Latitude_dd,Longitude_dd)
 head(sites_merged)
 ```
