@@ -172,14 +172,10 @@ pre code {
 </div>
 
 
-<p>We continue our work with the data, now we will focus on the site coordinate file.</p>
+<p>We continue our work with the data, now we will focus on the Population data file.</p>
 <p>We are going to fix some of the typical problems with real data.</p>
 <p>This and the following R-Markdown notebooks have been inspired by our real data curation work for the project about monitoring COVID virus levels in waste water around Scotland (<a href="https://biordm.github.io/COVID-Wastewater-Scotland/">see project page</a>).</p>
 <p>Firstly, we will read our site coordinates data and check the number of rows</p>
-<pre class="r"><code>site_data &lt;- read.csv(&quot;../raw_data/Sites_coordinates.csv&quot;)
-nrow(site_data)</code></pre>
-<pre><code>## [1] 124</code></pre>
-<p>Now we can read the unique site names in curated data file and check for the number of sites.</p>
 <pre class="r"><code>library(dplyr)</code></pre>
 <pre><code>## 
 ## Attaching package: &#39;dplyr&#39;</code></pre>
@@ -189,131 +185,164 @@ nrow(site_data)</code></pre>
 <pre><code>## The following objects are masked from &#39;package:base&#39;:
 ## 
 ##     intersect, setdiff, setequal, union</code></pre>
+<pre class="r"><code>population_data &lt;- read.csv(&quot;../raw_data/Sites_population.csv&quot;)</code></pre>
+<p>First lets have a look at the population data</p>
+<pre class="r"><code>head(population_data)</code></pre>
+<pre><code>##          Health.Area Site.Name       Date Population.Band Population
+## 1 Ayrshire and Arran   Cumnock 19/02/2021      10k - 100k      13690
+## 2 Ayrshire and Arran   Cumnock 23/02/2021      10k - 100k      13690
+## 3 Ayrshire and Arran   Cumnock 01/03/2021      10k - 100k      13690
+## 4 Ayrshire and Arran   Cumnock 08/03/2021      10k - 100k      13690
+## 5 Ayrshire and Arran   Cumnock 15/03/2021      10k - 100k      13690
+## 6 Ayrshire and Arran   Cumnock 22/03/2021      10k - 100k      13690
+##   Result.Description...N1.Gene Reported.Value...N1.Gene..gc.l.
+## 1                     Positive                           85619
+## 2                     Positive                           75691
+## 3                     Positive                           42624
+## 4                     Positive                           12469
+## 5                     Positive                           13536
+## 6                     Positive                           30014
+##   Days.Since.Sampled
+## 1           363 days
+## 2           359 days
+## 3           353 days
+## 4           346 days
+## 5           339 days
+## 6           332 days</code></pre>
+<p>We need only first 5 columns of the population data. Also we need to rename the population data</p>
+<pre class="r"><code>population_data&lt;-population_data[,c(1:2,4:5)]
+dictionary &lt;- data.frame(
+  old_name = c(&quot;Health.Area&quot;,&quot;Site.Name&quot;,&quot;Population.Band&quot;,&quot;Population&quot;),
+  new_name = c(&quot;Health_Board&quot;,&quot;Site&quot;,&quot;Population_Band&quot;,&quot;Population&quot;)
+)
+renamed_population_data &lt;- population_data
+names(renamed_population_data)[match(dictionary$old_name, names(renamed_population_data))] &lt;- dictionary$new_name
+head(renamed_population_data)</code></pre>
+<pre><code>##         Health_Board    Site Population_Band Population
+## 1 Ayrshire and Arran Cumnock      10k - 100k      13690
+## 2 Ayrshire and Arran Cumnock      10k - 100k      13690
+## 3 Ayrshire and Arran Cumnock      10k - 100k      13690
+## 4 Ayrshire and Arran Cumnock      10k - 100k      13690
+## 5 Ayrshire and Arran Cumnock      10k - 100k      13690
+## 6 Ayrshire and Arran Cumnock      10k - 100k      13690</code></pre>
+<p>We will first use the ‘aggregate’ function in base R to count the occurrence of each site</p>
+<pre class="r"><code>site_count &lt;- aggregate(renamed_population_data$Site, by=list(renamed_population_data$Site), FUN=length) 
+head(site_count)</code></pre>
+<pre><code>##      Group.1   x
+## 1 Allanfearn 254
+## 2     Allers  44
+## 3      Alloa 115
+## 4     Alness   8
+## 5       Alva  75
+## 6      Annan  71</code></pre>
+<p>Now we can read the unique site names in curated data file and check for the number of sites.</p>
+<pre class="r"><code>filter(site_count, x &lt;5)</code></pre>
+<pre><code>##      Group.1 x
+## 1    Invurie 1
+## 2 Sheildhall 1
+## 3  Stevenson 3</code></pre>
+<p>We got a list of sites which needs to be replaced with the correct names. Now next step is to replace the misspelled names with the corrected ones.</p>
+<p>Now we can replace these misspelled sites with the correct names with recode function</p>
+<pre class="r"><code>curated_population_data &lt;- renamed_population_data
+curated_population_data$Site &lt;- recode(curated_population_data$Site,  &quot;Invurie&quot;=&quot;Inverurie&quot;, &quot;Sheildhall&quot;=&quot;Shieldhall&quot;,&quot;Stevenson&quot;=&quot;Stevenston&quot;)</code></pre>
+<p>Now to make it simpler we will select the unique rows from the curated population data. We can order the data set by Site and check the resultant table</p>
+<pre class="r"><code>curated_population_data &lt;- unique(curated_population_data)
+curated_population_data&lt;- curated_population_data[order(curated_population_data$Site),]
+head(curated_population_data )</code></pre>
+<pre><code>##      Health_Board       Site Population_Band Population
+## 5366     Highland Allanfearn      10k - 100k      62058
+## 8515      (Empty) Allanfearn         (Empty)    (Empty)
+## 5927  Lanarkshire     Allers      10k - 100k      30137
+## 2759 Forth Valley      Alloa      10k - 100k      34758
+## 5619     Highland     Alness        4k - 10k       9287
+## 8516      (Empty)     Alness         (Empty)    (Empty)</code></pre>
+<p>In the table we can see there are two records of Allanfearn. One shows Health_Board as “Highland” and other has HB as well as population information as “(Empty)”. This is a data entry error which needs to be rectified. Now let’s take the aggregate of the data by Site and find out how many sites are like this.</p>
+<pre class="r"><code>site_count &lt;- aggregate(curated_population_data$Site, by=list(curated_population_data$Site), FUN=length) 
+filter(site_count, x &gt;1)</code></pre>
+<pre><code>##        Group.1 x
+## 1   Allanfearn 2
+## 2       Alness 2
+## 3     Carbarns 2
+## 4 Fort William 2
+## 5   Galashiels 2
+## 6    Inverurie 2
+## 7        Perth 2
+## 8   Shieldhall 2
+## 9   Stevenston 2</code></pre>
+<p>We can see clearly there are 9 sites which have this issue. The extra records with Health_Board entry as “(Empty)” needs to be removed. In order to make sure we don’t miss out any sites, lets take a look at all the all the sites for which population value is empty.</p>
+<pre class="r"><code>subset(curated_population_data, curated_population_data$Population == &quot;(Empty)&quot;)</code></pre>
+<pre><code>##      Health_Board         Site Population_Band Population
+## 8515      (Empty)   Allanfearn         (Empty)    (Empty)
+## 8516      (Empty)       Alness         (Empty)    (Empty)
+## 8517      (Empty)     Carbarns         (Empty)    (Empty)
+## 8518      (Empty)       Dunoon         (Empty)    (Empty)
+## 8530      (Empty) Fort William         (Empty)    (Empty)
+## 8531      (Empty)   Galashiels         (Empty)    (Empty)
+## 8532      (Empty)   Haddington         (Empty)    (Empty)
+## 8548      (Empty)    Inverurie         (Empty)    (Empty)
+## 8549      (Empty)     Jedburgh         (Empty)    (Empty)
+## 8564      (Empty)         Oban         (Empty)    (Empty)
+## 8572      (Empty)        Perth         (Empty)    (Empty)
+## 8573      (Empty)   Shieldhall         (Empty)    (Empty)
+## 8574      (Empty)   Stevenston         (Empty)    (Empty)</code></pre>
+<p>Here we can see some extra sites: “Dunoon”, “Haddington”,“Jedburgh”,“Oban” for which population information is missing. As these are independent sites, the population information needs to be entered. So let’s first enter the population information for these sites which are missing.</p>
+<pre class="r"><code>curated_population_data[which(curated_population_data$Site == &quot;Dunoon&quot;), ] &lt;-c(&quot;Highland&quot;,&quot;Dunoon&quot;,&quot;4k - 10k&quot;,7830)
+curated_population_data[which(curated_population_data$Site == &quot;Haddington&quot;), ] &lt;- c(&quot;Lothian&quot;,&quot;Haddington&quot;,&quot;4k - 10k&quot;,9130 ) 
+curated_population_data[which(curated_population_data$Site == &quot;Jedburgh&quot;), ] &lt;-c(&quot;Borders&quot;,&quot;Jedburgh&quot;,&quot;2k - 4k&quot;,3910)
+curated_population_data[which(curated_population_data$Site == &quot;Oban&quot;), ] &lt;- c(&quot;Highland&quot;,&quot;Oban&quot;,&quot;4k - 10k&quot;,8490 ) </code></pre>
+<p>Now we have entered the missing population information , we have again have a look at the data</p>
+<pre class="r"><code>subset(curated_population_data, curated_population_data$Population == &quot;(Empty)&quot;)</code></pre>
+<pre><code>##      Health_Board         Site Population_Band Population
+## 8515      (Empty)   Allanfearn         (Empty)    (Empty)
+## 8516      (Empty)       Alness         (Empty)    (Empty)
+## 8517      (Empty)     Carbarns         (Empty)    (Empty)
+## 8530      (Empty) Fort William         (Empty)    (Empty)
+## 8531      (Empty)   Galashiels         (Empty)    (Empty)
+## 8548      (Empty)    Inverurie         (Empty)    (Empty)
+## 8572      (Empty)        Perth         (Empty)    (Empty)
+## 8573      (Empty)   Shieldhall         (Empty)    (Empty)
+## 8574      (Empty)   Stevenston         (Empty)    (Empty)</code></pre>
+<p>Now we have only 9 rows which are there because of duplication of sites. Lets remove those</p>
+<pre class="r"><code>curated_population_data &lt;- subset(curated_population_data, curated_population_data$Population != &quot;(Empty)&quot;)</code></pre>
 <pre class="r"><code>curated_data &lt;- read.csv(&quot;../data/curated_data.csv&quot;)
 site_unique&lt;-unique(select(curated_data,Health_Board,Site))
-nrow(site_unique)</code></pre>
-<pre><code>## [1] 162</code></pre>
-<p>Clearly we can see a mismatch. The site coordinates file which we have is not complete. So we need to add the missing sites. Lets find now which all sites are missing from the Sites_coordinates.csv file.</p>
-<p>Lets have a look in to the Sites_coordinates.csv file</p>
-<pre class="r"><code>head(site_data)</code></pre>
-<pre><code>##          Health.Area   Site.Name      Lat     Long
-## 1 Ayrshire and Arran     Cumnock 620407.3 255829.2
-## 2 Ayrshire and Arran    Muirkirk 626364.3 267698.5
-## 3 Ayrshire and Arran New Cumnock 613986.3 262184.2
-## 4 Ayrshire and Arran     Fairlie 655930.4 220705.8
-## 5 Ayrshire and Arran       Largs 662381.9 219430.8
-## 6 Ayrshire and Arran  Meadowhead 635857.5 233866.8</code></pre>
-<p>We need to firstly change the column names in to standard format. Let’s use a dictionary for this.</p>
-<pre class="r"><code>dictionary &lt;- data.frame(
-  old_name = c(&quot;Health.Area&quot;,&quot;Site.Name&quot;,&quot;Lat&quot;,&quot;Long&quot;),
-  new_name = c(&quot;Health_Board&quot;,&quot;Site&quot;,&quot;Latitude_dd&quot;,&quot;Longitude_dd&quot;)
-)
-renamed_site_data &lt;- site_data
-names(renamed_site_data)[match(dictionary$old_name, names(renamed_site_data))] &lt;- dictionary$new_name
-head(renamed_site_data)</code></pre>
-<pre><code>##         Health_Board        Site Latitude_dd Longitude_dd
-## 1 Ayrshire and Arran     Cumnock    620407.3     255829.2
-## 2 Ayrshire and Arran    Muirkirk    626364.3     267698.5
-## 3 Ayrshire and Arran New Cumnock    613986.3     262184.2
-## 4 Ayrshire and Arran     Fairlie    655930.4     220705.8
-## 5 Ayrshire and Arran       Largs    662381.9     219430.8
-## 6 Ayrshire and Arran  Meadowhead    635857.5     233866.8</code></pre>
-<p>Now we can inspect which sites are missing from the two files. Lets use anti_join function from dplyr package</p>
-<pre class="r"><code>anti_join(renamed_site_data,site_unique, by = &quot;Site&quot;)</code></pre>
-<pre><code>##   Health_Board        Site Latitude_dd Longitude_dd
-## 1      (Empty)  Auchinairn          NA           NA
-## 2      (Empty)     Newtown          NA           NA
-## 3      (Empty) St Andrews           NA           NA
-## 4      (Empty)   Steveston          NA           NA</code></pre>
-<pre class="r"><code>sites_extra &lt;- anti_join(site_unique,renamed_site_data, by = &quot;Site&quot;)
-sites_extra</code></pre>
-<pre><code>##                 Health_Board                              Site
-## 1                Lanarkshire              Allers - St Leonards
-## 2         Ayrshire and Arran              Cumnock - Netherwood
-## 3  Greater Glasgow and Clyde       Dalmuir - Auchinairn (6298)
-## 4  Greater Glasgow and Clyde       Dalmuir - Auchinairn (6330)
-## 5  Greater Glasgow and Clyde               Dalmuir - Clydebank
-## 6  Greater Glasgow and Clyde              Dalmuir - Minerva St
-## 7  Greater Glasgow and Clyde                    Dalmuir - SECC
-## 8                Lanarkshire          Dunnswood - Carrickstone
-## 9                   Highland                            Dunoon
-## 10                   Tayside                  Forfar - Central
-## 11                   Tayside              Hatton - Fintry East
-## 12                   Tayside             Hatton - Fintry North
-## 13                   Tayside              Hatton - Fintry West
-## 14 Greater Glasgow and Clyde              Inverclyde - Gourock
-## 15        Ayrshire and Arran       Meadowhead - Kilmarnock HMP
-## 16                  Grampian                Nigg - Aberdeen RI
-## 17                  Grampian                      Nigg - Torry
-## 18                  Highland                              Oban
-## 19 Greater Glasgow and Clyde                 Paisley - Airport
-## 20 Greater Glasgow and Clyde               Paisley - Blackhall
-## 21 Greater Glasgow and Clyde               Paisley - Brediland
-## 22                  Grampian              Persley - Northfield
-## 23               Lanarkshire  Philipshill - Hairmyres Hospital
-## 24               Lanarkshire Philipshill - Stewartfield (3606)
-## 25               Lanarkshire Philipshill - Stewartfield (7801)
-## 26                   Lothian              Seafield - Cockenzie
-## 27                   Lothian            Seafield - Craigmillar
-## 28                   Lothian              Seafield - Muirhouse
-## 29                   Lothian              Seafield - Restalrig
-## 30                   Lothian                Seafield - Tranent
-## 31                   Lothian        Seafield - Western General
-## 32 Greater Glasgow and Clyde             Shieldhall - Barrhead
-## 33 Greater Glasgow and Clyde              Shieldhall - Gorbals
-## 34 Greater Glasgow and Clyde            Shieldhall - Govanhill
-## 35 Greater Glasgow and Clyde                 Shieldhall - IMAX
-## 36 Greater Glasgow and Clyde  Shieldhall - Pollockshields West
-## 37 Greater Glasgow and Clyde       Shieldhall - Science Centre
-## 38                      Fife    St Andrews - University (2979)
-## 39                      Fife    St Andrews - University (4964)
-## 40        Ayrshire and Arran      Stevenston - Stevenston East
-## 41        Ayrshire and Arran      Stevenston - Stevenston West
-## 42              Forth Valley             Stirling - University</code></pre>
-<p>The first table shows the list of sites which are present in the Site_Coordinates file but absent in the curated data site lists. So these are misspelled sites and needs to be removed. The second table shows the sites in curated data but not in Site coordinates file. So we can see that these are the sites that needs to be added to the coordinates file.</p>
-<p>Lets now inspect more the second list ie. the sites that are in the curated data but not in the site coordinates file</p>
-<pre class="r"><code>glimpse(grep(&quot;-&quot;, unlist(sites_extra$Site), value = TRUE))</code></pre>
-<pre><code>##  chr [1:40] &quot;Allers - St Leonards&quot; &quot;Cumnock - Netherwood&quot; ...</code></pre>
-<pre class="r"><code>glimpse(grep(&quot;-&quot;, unlist(sites_extra$Site), value = TRUE,invert = T))</code></pre>
-<pre><code>##  chr [1:2] &quot;Dunoon&quot; &quot;Oban&quot;</code></pre>
-<p>The grep function in R with the option “value=TRUE” returns all the sites which has “-” in it. The second grep function here with “invert =T” added returns the sites without any “-” symbol in it</p>
-<p>The first list shows the sites which defines some subregions of already available sites in the Sites_Coordinates.csv file. For example, Allers is a site present in the coordinate file. So we can figure out that the same Latitude and longitude values can be used for these subregions. The sites “Oban” and “Dunoon” are not part of any other main site. So the coordinate information needs to be added.</p>
-<p>We need to do three things for curation of the coordinate file. 1. Remove the misspelled sites from renamed_site_data 2. Add the missing coordinate information for “Oban” and “Dunoon” 3. Add the missing coordinate details for missing sites with “-”</p>
-<pre class="r"><code>renamed_site_data &lt;- subset(renamed_site_data, renamed_site_data$Health_Board != &quot;(Empty)&quot;)
-sites_merged &lt;- merge(site_unique,select(renamed_site_data,Site,Latitude_dd,Longitude_dd), by = &#39;Site&#39;, all=TRUE)</code></pre>
-<p>First we are removing the sites which are misspelled in the coordinate file and then we merge them to the sites in the curated data file. Merge function adds all the sites which are missing in the coordinate file.</p>
-<p>Now we need to add the coordinates for “Oban” and “Dunoon”.</p>
-<pre class="r"><code>sites_merged[which(sites_merged$Site == &quot;Oban&quot;), ] &lt;-c(&quot;Oban&quot;,&quot;Highland&quot;,730176.21,185987.87)
-sites_merged[which(sites_merged$Site == &quot;Dunoon&quot;), ] &lt;- c(&quot;Dunoon&quot;,&quot;Highland&quot;,676972.15,217390.1) </code></pre>
-<p>We will now add the missing coordinate information for all the other sites</p>
-<pre class="r"><code>sites_merged&lt;- sites_merged[order(sites_merged$Site),]
-for (i in 1:162) {ifelse (is.na(sites_merged$Latitude_dd[i]),sites_merged$Latitude_dd[i]&lt;-y, y &lt;- sites_merged$Latitude_dd[i])}
-for (i in 1:162) {ifelse (is.na(sites_merged$Longitude_dd[i]),sites_merged$Longitude_dd[i]&lt;-x, x &lt;- sites_merged$Longitude_dd[i])}
-head(sites_merged)</code></pre>
-<pre><code>##                   Site Health_Board Latitude_dd Longitude_dd
-## 1           Allanfearn     Highland   847455.37    271126.37
-## 2               Allers  Lanarkshire   656127.64    266191.99
-## 3 Allers - St Leonards  Lanarkshire   656127.64    266191.99
-## 4                Alloa Forth Valley   691819.05    288662.05
-## 5               Alness     Highland   869016.43    267475.62
-## 6                 Alva Forth Valley   696609.21       287349</code></pre>
+Population_data&lt;-merge(site_unique,select(curated_population_data,Site,Population_Band,Population), by = &#39;Site&#39;,all=TRUE)
+glimpse(Population_data)</code></pre>
+<pre><code>## Rows: 162
+## Columns: 4
+## $ Site            &lt;chr&gt; &quot;Allanfearn&quot;, &quot;Allers&quot;, &quot;Allers - St Leonards&quot;, &quot;Alloa…
+## $ Health_Board    &lt;chr&gt; &quot;Highland&quot;, &quot;Lanarkshire&quot;, &quot;Lanarkshire&quot;, &quot;Forth Valle…
+## $ Population_Band &lt;chr&gt; &quot;10k - 100k&quot;, &quot;10k - 100k&quot;, NA, &quot;10k - 100k&quot;, &quot;4k - 10…
+## $ Population      &lt;chr&gt; &quot;62058&quot;, &quot;30137&quot;, NA, &quot;34758&quot;, &quot;9287&quot;, &quot;5243&quot;, &quot;8256&quot;,…</code></pre>
+<p>Now we need to fill out the missing population information, the sites have been already arranged according to alphabetic order</p>
+<pre class="r"><code>Population_data&lt;- Population_data[order(Population_data$Site),]
+for (i in 1:nrow(Population_data)) {ifelse (is.na(Population_data$Population_Band[i]),Population_data$Population_Band[i]&lt;-x, x &lt;- Population_data$Population_Band[i])}
+for (i in 1:nrow(Population_data)) {ifelse (is.na(Population_data$Population[i]),Population_data$Population[i]&lt;-y, y &lt;- Population_data$Population[i])}
+glimpse(Population_data)</code></pre>
+<pre><code>## Rows: 162
+## Columns: 4
+## $ Site            &lt;chr&gt; &quot;Allanfearn&quot;, &quot;Allers&quot;, &quot;Allers - St Leonards&quot;, &quot;Alloa…
+## $ Health_Board    &lt;chr&gt; &quot;Highland&quot;, &quot;Lanarkshire&quot;, &quot;Lanarkshire&quot;, &quot;Forth Valle…
+## $ Population_Band &lt;chr&gt; &quot;10k - 100k&quot;, &quot;10k - 100k&quot;, &quot;10k - 100k&quot;, &quot;10k - 100k&quot;…
+## $ Population      &lt;chr&gt; &quot;62058&quot;, &quot;30137&quot;, &quot;30137&quot;, &quot;34758&quot;, &quot;9287&quot;, &quot;5243&quot;, &quot;8…</code></pre>
 <p>The file is looking fine. Let’s rearrange the columns so that Health board is arranged as first column</p>
-<pre class="r"><code>sites_merged &lt;- select(sites_merged,Health_Board,Site,Latitude_dd,Longitude_dd)
-head(sites_merged)</code></pre>
-<pre><code>##   Health_Board                 Site Latitude_dd Longitude_dd
-## 1     Highland           Allanfearn   847455.37    271126.37
-## 2  Lanarkshire               Allers   656127.64    266191.99
-## 3  Lanarkshire Allers - St Leonards   656127.64    266191.99
-## 4 Forth Valley                Alloa   691819.05    288662.05
-## 5     Highland               Alness   869016.43    267475.62
-## 6 Forth Valley                 Alva   696609.21       287349</code></pre>
+<pre class="r"><code>library(dplyr)
+Population_data &lt;- select(Population_data,Health_Board,Site,Population_Band,Population)
+head(Population_data)</code></pre>
+<pre><code>##   Health_Board                 Site Population_Band Population
+## 1     Highland           Allanfearn      10k - 100k      62058
+## 2  Lanarkshire               Allers      10k - 100k      30137
+## 3  Lanarkshire Allers - St Leonards      10k - 100k      30137
+## 4 Forth Valley                Alloa      10k - 100k      34758
+## 5     Highland               Alness        4k - 10k       9287
+## 6 Forth Valley                 Alva        4k - 10k       5243</code></pre>
 <p>Let’s save our curated site coordinate data into a file.</p>
 <pre class="r"><code>if (!file.exists(&#39;../data&#39;)) {
   dir.create(file.path(&#39;..&#39;, &#39;data&#39;))  
 }
 
-fName = &#39;../data/curated_site_coordinate_data.csv&#39;
-write.csv(sites_merged, fName, row.names = FALSE)</code></pre>
+fName = &#39;../data/curated_population_data.csv&#39;
+write.csv(Population_data, fName, row.names = FALSE)</code></pre>
 
 
 

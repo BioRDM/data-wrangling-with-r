@@ -54,9 +54,7 @@ Now we can inspect which sites are missing from the two files. Lets use anti_joi
 
 
 ```{r}
-library(dplyr)
 anti_join(renamed_site_data,site_unique, by = "Site")
-
 sites_extra <- anti_join(site_unique,renamed_site_data, by = "Site")
 sites_extra
 ```
@@ -74,7 +72,7 @@ The first list shows the sites which defines some subregions of already availabl
 The sites "Oban" and "Dunoon" are not part of any other main site. So the coordinate information needs to be added.
 
 We need to do three things for curation of the coordinate file.
-1. Remove the mispelled sites from renamed_site_data
+1. Remove the misspelled sites from renamed_site_data
 2. Add the missing coordinate information for "Oban" and "Dunoon"
 3. Add the missing coordinate details for missing sites with "-"
 
@@ -102,7 +100,7 @@ head(sites_merged)
 ```
 The file is looking fine. Let's rearrange the columns so that Health board is arranged as first column
 ```{r}
-library(dplyr)
+
 sites_merged <- select(sites_merged,Health_Board,Site,Latitude_dd,Longitude_dd)
 head(sites_merged)
 ```
