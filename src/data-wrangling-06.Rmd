@@ -1,0 +1,61 @@
+---
+title: "Data wrangling with R - P2 Sampling sites file generation"
+author: "Sumy V Baby, Tomasz Zielinski"
+date: "2022-03-23"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+We continue our work with the data, now we will focus on Sampling sites file generation
+
+This and the following R-Markdown notebooks have been inspired by our real data curation work for the project about monitoring COVID virus levels in waste water around Scotland ([see project page](https://biordm.github.io/COVID-Wastewater-Scotland/)).
+
+Firstly, read our renamed data.
+
+## Reading the data files after loading necessary libraries
+
+We need to read the curated_site_coordinate_data.csv and curated_population_data.csv files first
+
+```{r}
+library("lubridate")
+library("tidyverse")
+
+curated_data<- read.csv("../data/curated_data.csv", check.names = F)
+sampling_sites<- read.csv("../out/sampling_sites.csv")
+glimpse(curated_data)
+glimpse(sampling_sites)
+
+```
+We can use command `glimpse` to see all the columns (variables) and first data in each column.
+Now lets merge the two data sets by site
+
+```{r}
+merged<-merge(sampling_sites, curated_data, by = "Site")
+head(merged)
+```
+We can see two Health_Board entries from both data sets. We need to keep only one of them as both are the same. Let's select the columns we need.
+
+
+```{r}
+merged_full<-select(merged,Health_Board.x,Site,Latitude_dd,Longitude_dd,Population,Population_Band,Date_collected,Date_collected,Date_analysed,SW_sample_number,N1_description,"N1_Reported_value-gc_per_L","N1_Repl_1-gc_per_L","N1_Repl_2-gc_per_L","N1_Repl_3-gc_per_L","Calculated_mean","Standard_Deviation","Flow-L_per_day","Ammonia-mg_per_L","pH_value","Modelled_flow-L_per_day","Million_gene_copies_per_person_per_day","Analysis_lab")
+head(merged_full)
+```
+Now we need to rename Health_Board.x to Health_Board
+
+```{r}
+colnames(merged_full)[1] <- 'Health_Board'
+```
+
+Now the file is ready. We can create the out directory if it doesn't exist and save the file
+```{r}
+if (!file.exists('../out')) {
+  dir.create(file.path('..', 'out'))  
+}
+
+fName = '../out/data_full.csv'
+write.csv(merged_full, fName, row.names = FALSE)
+```
+

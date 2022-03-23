@@ -115,7 +115,7 @@ So lets rename all the columns using two lists of names
 dictionary <- data.frame(
   old_name = c('HBNAME','Site','Date','Date.Analysed','SW.Sample.Number','N1.Description','N1.Reported.Value','N1.Sample.1','N1.Sample.2','N1.Sample.3','Calculated.Mean','Standard.Deviation','Flow..l.day.','Ammonia..mg.l.','pH.Value','Modelled.Flow..l.day.','Million.Gene.Copies.Per.Person.per.Day','Analysis.Lab','X.Row.Count.'),
 
-  new_name = c("Health_Board","Site","Date_collected","Date_analysed", "SW_sample_number","N1_description", "N1_Reported_value-gc_per_L","N1_Repl_1-gc_per_L","N1_Repl_2-gc_per_L","N1_Repl_3-gc_per_L","Calculated_mean","Standard_Deviation","Flow_L_per_day","Ammonia_mg_per_L","pH_value","Modelled_flow-L_per_day","Million_gene_copies_per_person_per_day","Analysis_lab","Row_Count")
+  new_name = c("Health_Board","Site","Date_collected","Date_analysed", "SW_sample_number","N1_description", "N1_Reported_value-gc_per_L","N1_Repl_1-gc_per_L","N1_Repl_2-gc_per_L","N1_Repl_3-gc_per_L","Calculated_mean","Standard_Deviation","Flow-L_per_day","Ammonia-mg_per_L","pH_value","Modelled_flow-L_per_day","Million_gene_copies_per_person_per_day","Analysis_lab","Row_Count")
 )
 renamed_data <- raw_data
 names(renamed_data)[match(dictionary$old_name, names(renamed_data))] <- dictionary$new_name
@@ -138,7 +138,7 @@ We first checked if the output directory exists, if not create it and then we sa
 
 ### Automatic correction
 
-You may noticed that in mayority of the cases we just replaced . with _ in our new columm names.
+You may noticed that in majority of the cases we just replaced . with _ in our new columm names.
 Segure it could be done in some automatic way.
 
 Indeed, it can be done using pattern matching with regular expressions. 
