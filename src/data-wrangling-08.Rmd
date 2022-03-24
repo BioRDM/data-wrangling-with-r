@@ -1,0 +1,114 @@
+---
+title: "Data wrangling with R - P2 Weekly Time series generation"
+author: "Sumy V Baby, Tomasz Zielinski"
+date: "2022-03-24"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+We continue our work with the data, now we will focus on prevalance time series and normalized prevalence file generation
+
+This and the following R-Markdown notebooks have been inspired by our real data curation work for the project about monitoring COVID virus levels in waste water around Scotland ([see project page](https://biordm.github.io/COVID-Wastewater-Scotland/)).
+
+Firstly, read our renamed data.
+
+## Reading the data files after loading necessary libraries
+
+We need to read the curated_site_coordinate_data.csv and curated_population_data.csv files first
+
+```{r}
+library("lubridate")
+library("tidyverse")
+library("tidyr")
+
+curated_data<- read.csv("../data/curated_data.csv", check.names = F)
+sampling_sites<- read.csv("../out/sampling_sites.csv")
+glimpse(curated_data)
+glimpse(sampling_sites)
+
+```
+We can use command `glimpse` to see all the columns (variables) and first data in each column.
+First we need to convert the Date_collected column as date format and extract the week and year information from that.
+
+```{r}
+date =as.Date(curated_data$Date_collected, by="day")
+curated_data$week = sprintf("%02d", isoweek(date))
+curated_data$Year = year(date)
+```
+
+Now let's find the aggregate of "N1_Reported_value-gc_per_L" by Site , Week and Year . Also the aggregate of  "Million_gene_copies_per_person_per_day" (normalized data) by Site, Week and Year. In other words we need to find the weekly average of the reported as well as normalized data for each individual sites.
+
+```{r}
+MeanaggregateReported<-aggregate(curated_data$"N1_Reported_value-gc_per_L", by=list(Site=curated_data$Site, Year=curated_data$Year,Week = curated_data$week), FUN=mean, na.rm=TRUE) 
+Meanaggregatenormalized<-aggregate(curated_data$Million_gene_copies_per_person_per_day, by=list(Site=curated_data$Site, Year= curated_data$Year,Week = curated_data$week), FUN=mean, na.rm=TRUE)
+head(MeanaggregateReported)
+head(Meanaggregatenormalized)
+```
+
+Now let's create another column "Year-Week" and enter the values as "YYYY-WW" in to the column. Paste function can be used to join two column values with a separator 
+
+```{r}
+MeanaggregateReported$"Year-Week" <- paste(MeanaggregateReported$Year,MeanaggregateReported$Week,sep = "-")
+Meanaggregatenormalized$"Year-Week" <- paste(Meanaggregatenormalized$Year,Meanaggregatenormalized$Week,sep = "-")
+head(MeanaggregateReported)
+head(Meanaggregatenormalized)
+```
+
+Now we know that we need only three columns : Site, Year-Week, and the Weekly aggregate values(x). Let's use the select function for this.
+
+```{r}
+MeanaggregateReported<- select(MeanaggregateReported, Site,"Year-Week",x)
+Meanaggregatenormalized<- select(Meanaggregatenormalized, Site,"Year-Week",x) 
+head(MeanaggregateReported)
+head(Meanaggregatenormalized)
+```
+
+```{r}
+MeanaggregateReported.wide <- pivot_wider(MeanaggregateReported, names_from = "Year-Week", values_from = x)  
+Meanaggregatenormalized.wide <- pivot_wider(Meanaggregatenormalized, names_from = "Year-Week", values_from = x)
+
+```
+Now we need to convert the column name Site to row names and then sort the data according to the ascending order of column names
+
+```{r}
+MeanaggregateReported.wide<-column_to_rownames(MeanaggregateReported.wide, var = "Site") 
+MeanaggregateReported.wide <- MeanaggregateReported.wide[,order(colnames(MeanaggregateReported.wide))]
+
+Meanaggregatenormalized.wide<-column_to_rownames(Meanaggregatenormalized.wide, var = "Site") 
+Meanaggregatenormalized.wide<-Meanaggregatenormalized.wide[,order(colnames(Meanaggregatenormalized.wide))]
+head(MeanaggregateReported.wide)
+head(Meanaggregatenormalized.wide)
+```
+
+We have ordered the files by column names. For using merge function we need to convert back rownames to column
+```{r}
+MeanaggregateReported.wide<-rownames_to_column(MeanaggregateReported.wide, var = "Site") 
+Meanaggregatenormalized.wide<-rownames_to_column(Meanaggregatenormalized.wide, var = "Site") 
+```
+Now let's merge it with the sampling site data using full_join function
+
+```{r}
+#sampling_sites<-select(sampling_sites,Health_Board,Site,Latitude_dd,Longitude_dd,Population,Population_Band)
+
+Weekly_Prevalance_time_series<-full_join(select(sampling_sites,Health_Board,Site,Latitude_dd,Longitude_dd,Population,Population_Band),MeanaggregateReported.wide, by = "Site")
+Weekly_Prevalance_norm_time_series<-full_join(select(sampling_sites,Health_Board,Site,Latitude_dd,Longitude_dd,Population,Population_Band),Meanaggregatenormalized.wide, by = "Site")
+head(Weekly_Prevalance_time_series)
+head(Weekly_Prevalance_norm_time_series)
+
+
+```
+
+```{r}
+if (!file.exists('../out')) {
+  dir.create(file.path('..', 'out'))  
+}
+
+fName1 = '../out/weekly_prevalence_timeseries.csv'
+fName2 = '../out/weekly_normprevalence_timeseries.csv'
+write.csv(Weekly_Prevalance_time_series, fName1, row.names = FALSE)
+write.csv(Weekly_Prevalance_norm_time_series, fName2, row.names = FALSE)
+```
+
