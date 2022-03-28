@@ -175,7 +175,7 @@ pre code {
 <p>We continue our work with the data, now we will focus on the Population data file.</p>
 <p>We are going to fix some of the typical problems with real data.</p>
 <p>This and the following R-Markdown notebooks have been inspired by our real data curation work for the project about monitoring COVID virus levels in waste water around Scotland (<a href="https://biordm.github.io/COVID-Wastewater-Scotland/">see project page</a>).</p>
-<p>Firstly, we will read our site coordinates data and check the number of rows</p>
+<p>We will read the Sites_population.csv file</p>
 <pre class="r"><code>library(dplyr)</code></pre>
 <pre><code>## 
 ## Attaching package: &#39;dplyr&#39;</code></pre>
@@ -186,7 +186,18 @@ pre code {
 ## 
 ##     intersect, setdiff, setequal, union</code></pre>
 <pre class="r"><code>population_data &lt;- read.csv(&quot;../raw_data/Sites_population.csv&quot;)</code></pre>
-<p>First lets have a look at the population data</p>
+<p>Now we will read the curated_data.csv file and look for the distinct Health_Board and Site combination in data using “unique” function</p>
+<pre class="r"><code>curated_data &lt;- read.csv(&quot;../data/curated_data.csv&quot;)
+site_unique&lt;-unique(select(curated_data,Health_Board,Site))
+head(site_unique)</code></pre>
+<pre><code>##     Health_Board                 Site
+## 1       Highland           Allanfearn
+## 262  Lanarkshire               Allers
+## 307  Lanarkshire Allers - St Leonards
+## 315 Forth Valley                Alloa
+## 433     Highland               Alness
+## 443 Forth Valley                 Alva</code></pre>
+<p>Now let’s have a look at the population data. It has many repeating records for each site and date combination.</p>
 <pre class="r"><code>head(population_data)</code></pre>
 <pre><code>##          Health.Area Site.Name       Date Population.Band Population
 ## 1 Ayrshire and Arran   Cumnock 19/02/2021      10k - 100k      13690
@@ -209,9 +220,18 @@ pre code {
 ## 4           346 days
 ## 5           339 days
 ## 6           332 days</code></pre>
-<p>We need only first 5 columns of the population data. Also we need to rename the population data</p>
+<p>We can select 5 columns of the population data that is Health.Area, Site.Name,Population.Band,Population. The “:” is used to denote a range of columns. For example in the below code we will select the columns from 1 to 2, then leave the third column and select columns 4 to 5.</p>
 <pre class="r"><code>population_data&lt;-population_data[,c(1:2,4:5)]
-dictionary &lt;- data.frame(
+head(population_data)</code></pre>
+<pre><code>##          Health.Area Site.Name Population.Band Population
+## 1 Ayrshire and Arran   Cumnock      10k - 100k      13690
+## 2 Ayrshire and Arran   Cumnock      10k - 100k      13690
+## 3 Ayrshire and Arran   Cumnock      10k - 100k      13690
+## 4 Ayrshire and Arran   Cumnock      10k - 100k      13690
+## 5 Ayrshire and Arran   Cumnock      10k - 100k      13690
+## 6 Ayrshire and Arran   Cumnock      10k - 100k      13690</code></pre>
+<p>As we can see the column names needs to be changed. Now we can rename the columns using dictionary</p>
+<pre class="r"><code>dictionary &lt;- data.frame(
   old_name = c(&quot;Health.Area&quot;,&quot;Site.Name&quot;,&quot;Population.Band&quot;,&quot;Population&quot;),
   new_name = c(&quot;Health_Board&quot;,&quot;Site&quot;,&quot;Population_Band&quot;,&quot;Population&quot;)
 )
@@ -235,14 +255,14 @@ head(site_count)</code></pre>
 ## 4     Alness   8
 ## 5       Alva  75
 ## 6      Annan  71</code></pre>
-<p>Now we can read the unique site names in curated data file and check for the number of sites.</p>
+<p>Now we can filter the sites which are repeating less than 5 times</p>
 <pre class="r"><code>filter(site_count, x &lt;5)</code></pre>
 <pre><code>##      Group.1 x
 ## 1    Invurie 1
 ## 2 Sheildhall 1
 ## 3  Stevenson 3</code></pre>
-<p>We got a list of sites which needs to be replaced with the correct names. Now next step is to replace the misspelled names with the corrected ones.</p>
-<p>Now we can replace these misspelled sites with the correct names with recode function</p>
+<p>We got a list of sites which needs to be replaced with the correct names. Now the next step is to replace the misspelled names with the corrected ones.</p>
+<p>Now we can replace these misspelled sites with the correct names with “recode” function in “dplyr” library.</p>
 <pre class="r"><code>curated_population_data &lt;- renamed_population_data
 curated_population_data$Site &lt;- recode(curated_population_data$Site,  &quot;Invurie&quot;=&quot;Inverurie&quot;, &quot;Sheildhall&quot;=&quot;Shieldhall&quot;,&quot;Stevenson&quot;=&quot;Stevenston&quot;)</code></pre>
 <p>Now to make it simpler we will select the unique rows from the curated population data. We can order the data set by Site and check the resultant table</p>
@@ -269,7 +289,7 @@ filter(site_count, x &gt;1)</code></pre>
 ## 7        Perth 2
 ## 8   Shieldhall 2
 ## 9   Stevenston 2</code></pre>
-<p>We can see clearly there are 9 sites which have this issue. The extra records with Health_Board entry as “(Empty)” needs to be removed. In order to make sure we don’t miss out any sites, lets take a look at all the all the sites for which population value is empty.</p>
+<p>We can see clearly there are 9 sites which have this issue. The extra records with Health_Board entry as “(Empty)” needs to be removed. In order to make sure we don’t miss out any sites, let’s take a look at all the all the sites for which population value is empty. The “subset” function from R bse can be used here.</p>
 <pre class="r"><code>subset(curated_population_data, curated_population_data$Population == &quot;(Empty)&quot;)</code></pre>
 <pre><code>##      Health_Board         Site Population_Band Population
 ## 8515      (Empty)   Allanfearn         (Empty)    (Empty)
@@ -286,11 +306,12 @@ filter(site_count, x &gt;1)</code></pre>
 ## 8573      (Empty)   Shieldhall         (Empty)    (Empty)
 ## 8574      (Empty)   Stevenston         (Empty)    (Empty)</code></pre>
 <p>Here we can see some extra sites: “Dunoon”, “Haddington”,“Jedburgh”,“Oban” for which population information is missing. As these are independent sites, the population information needs to be entered. So let’s first enter the population information for these sites which are missing.</p>
+<p>The which() function in R returns the position or the index of the value which satisfies the given condition. We can use it for entering the records of missing population sites.</p>
 <pre class="r"><code>curated_population_data[which(curated_population_data$Site == &quot;Dunoon&quot;), ] &lt;-c(&quot;Highland&quot;,&quot;Dunoon&quot;,&quot;4k - 10k&quot;,7830)
 curated_population_data[which(curated_population_data$Site == &quot;Haddington&quot;), ] &lt;- c(&quot;Lothian&quot;,&quot;Haddington&quot;,&quot;4k - 10k&quot;,9130 ) 
 curated_population_data[which(curated_population_data$Site == &quot;Jedburgh&quot;), ] &lt;-c(&quot;Borders&quot;,&quot;Jedburgh&quot;,&quot;2k - 4k&quot;,3910)
 curated_population_data[which(curated_population_data$Site == &quot;Oban&quot;), ] &lt;- c(&quot;Highland&quot;,&quot;Oban&quot;,&quot;4k - 10k&quot;,8490 ) </code></pre>
-<p>Now we have entered the missing population information , we have again have a look at the data</p>
+<p>Now we have entered the missing population information , we have again have a look at the data. We will take the subset of the data where Population is “(Empty)”.</p>
 <pre class="r"><code>subset(curated_population_data, curated_population_data$Population == &quot;(Empty)&quot;)</code></pre>
 <pre><code>##      Health_Board         Site Population_Band Population
 ## 8515      (Empty)   Allanfearn         (Empty)    (Empty)
@@ -303,31 +324,51 @@ curated_population_data[which(curated_population_data$Site == &quot;Oban&quot;),
 ## 8573      (Empty)   Shieldhall         (Empty)    (Empty)
 ## 8574      (Empty)   Stevenston         (Empty)    (Empty)</code></pre>
 <p>Now we have only 9 rows which are there because of duplication of sites. Lets remove those</p>
-<pre class="r"><code>curated_population_data &lt;- subset(curated_population_data, curated_population_data$Population != &quot;(Empty)&quot;)</code></pre>
-<pre class="r"><code>curated_data &lt;- read.csv(&quot;../data/curated_data.csv&quot;)
-site_unique&lt;-unique(select(curated_data,Health_Board,Site))
-Population_data&lt;-merge(site_unique,select(curated_population_data,Site,Population_Band,Population), by = &#39;Site&#39;,all=TRUE)
-glimpse(Population_data)</code></pre>
-<pre><code>## Rows: 162
-## Columns: 4
-## $ Site            &lt;chr&gt; &quot;Allanfearn&quot;, &quot;Allers&quot;, &quot;Allers - St Leonards&quot;, &quot;Alloa…
-## $ Health_Board    &lt;chr&gt; &quot;Highland&quot;, &quot;Lanarkshire&quot;, &quot;Lanarkshire&quot;, &quot;Forth Valle…
-## $ Population_Band &lt;chr&gt; &quot;10k - 100k&quot;, &quot;10k - 100k&quot;, NA, &quot;10k - 100k&quot;, &quot;4k - 10…
-## $ Population      &lt;chr&gt; &quot;62058&quot;, &quot;30137&quot;, NA, &quot;34758&quot;, &quot;9287&quot;, &quot;5243&quot;, &quot;8256&quot;,…</code></pre>
-<p>Now we need to fill out the missing population information, the sites have been already arranged according to alphabetic order</p>
+<pre class="r"><code>curated_population_data &lt;- subset(curated_population_data, curated_population_data$Population != &quot;(Empty)&quot;)
+head(curated_population_data)</code></pre>
+<pre><code>##               Health_Board       Site Population_Band Population
+## 5366              Highland Allanfearn      10k - 100k      62058
+## 5927           Lanarkshire     Allers      10k - 100k      30137
+## 2759          Forth Valley      Alloa      10k - 100k      34758
+## 5619              Highland     Alness        4k - 10k       9287
+## 2874          Forth Valley       Alva        4k - 10k       5243
+## 1201 Dumfries and Galloway      Annan        4k - 10k       8256</code></pre>
+<p>Let’s merge the unique sites_unique with curated_population_data. The all=TRUE option in mege function is for icluding all the records from both the dataframes</p>
+<pre class="r"><code>Population_data&lt;-merge(site_unique,curated_population_data, by = &#39;Site&#39;,all=TRUE)
+head(Population_data)</code></pre>
+<pre><code>##                   Site Health_Board.x Health_Board.y Population_Band Population
+## 1           Allanfearn       Highland       Highland      10k - 100k      62058
+## 2               Allers    Lanarkshire    Lanarkshire      10k - 100k      30137
+## 3 Allers - St Leonards    Lanarkshire           &lt;NA&gt;            &lt;NA&gt;       &lt;NA&gt;
+## 4                Alloa   Forth Valley   Forth Valley      10k - 100k      34758
+## 5               Alness       Highland       Highland        4k - 10k       9287
+## 6                 Alva   Forth Valley   Forth Valley        4k - 10k       5243</code></pre>
+<p>Let’s avoid the Health_board.y that is from curated_population_data by selecting specific columns. It can be also done using “select” function.</p>
+<pre class="r"><code>Population_data&lt;-merge(site_unique,curated_population_data[,c(2:4)], by = &#39;Site&#39;,all=TRUE)
+# Population_data&lt;-merge(site_unique,select(curated_population_data,Site,Population_Band,Population), by = &#39;Site&#39;,all=TRUE)
+head(Population_data)</code></pre>
+<pre><code>##                   Site Health_Board Population_Band Population
+## 1           Allanfearn     Highland      10k - 100k      62058
+## 2               Allers  Lanarkshire      10k - 100k      30137
+## 3 Allers - St Leonards  Lanarkshire            &lt;NA&gt;       &lt;NA&gt;
+## 4                Alloa Forth Valley      10k - 100k      34758
+## 5               Alness     Highland        4k - 10k       9287
+## 6                 Alva Forth Valley        4k - 10k       5243</code></pre>
+<p>We can arrange the sites in alphabetic order and then fill out fill out the missing population. A for loop is used to iterate through each row and when the value of Population_Band in each row is not equal to “NA”, the value is stored in a variable “y”. When the value of Population_Band becomes “NA” the stored value in variable y is used to fill the missing Population_Band. Same logic is applied for filling out the missing Population values too.</p>
 <pre class="r"><code>Population_data&lt;- Population_data[order(Population_data$Site),]
 for (i in 1:nrow(Population_data)) {ifelse (is.na(Population_data$Population_Band[i]),Population_data$Population_Band[i]&lt;-x, x &lt;- Population_data$Population_Band[i])}
 for (i in 1:nrow(Population_data)) {ifelse (is.na(Population_data$Population[i]),Population_data$Population[i]&lt;-y, y &lt;- Population_data$Population[i])}
-glimpse(Population_data)</code></pre>
-<pre><code>## Rows: 162
-## Columns: 4
-## $ Site            &lt;chr&gt; &quot;Allanfearn&quot;, &quot;Allers&quot;, &quot;Allers - St Leonards&quot;, &quot;Alloa…
-## $ Health_Board    &lt;chr&gt; &quot;Highland&quot;, &quot;Lanarkshire&quot;, &quot;Lanarkshire&quot;, &quot;Forth Valle…
-## $ Population_Band &lt;chr&gt; &quot;10k - 100k&quot;, &quot;10k - 100k&quot;, &quot;10k - 100k&quot;, &quot;10k - 100k&quot;…
-## $ Population      &lt;chr&gt; &quot;62058&quot;, &quot;30137&quot;, &quot;30137&quot;, &quot;34758&quot;, &quot;9287&quot;, &quot;5243&quot;, &quot;8…</code></pre>
-<p>The file is looking fine. Let’s rearrange the columns so that Health board is arranged as first column</p>
-<pre class="r"><code>library(dplyr)
-Population_data &lt;- select(Population_data,Health_Board,Site,Population_Band,Population)
+head(Population_data)</code></pre>
+<pre><code>##                   Site Health_Board Population_Band Population
+## 1           Allanfearn     Highland      10k - 100k      62058
+## 2               Allers  Lanarkshire      10k - 100k      30137
+## 3 Allers - St Leonards  Lanarkshire      10k - 100k      30137
+## 4                Alloa Forth Valley      10k - 100k      34758
+## 5               Alness     Highland        4k - 10k       9287
+## 6                 Alva Forth Valley        4k - 10k       5243</code></pre>
+<p>The file is looking fine. Let’s rearrange the columns so that Health board is arranged as first column. It can be done simply by selecting the columns or using the “select” function.</p>
+<pre class="r"><code>Population_data &lt;- Population_data[,c(2,1,3,4)]
+#Population_data &lt;- select(Population_data,Health_Board,Site,Population_Band,Population)
 head(Population_data)</code></pre>
 <pre><code>##   Health_Board                 Site Population_Band Population
 ## 1     Highland           Allanfearn      10k - 100k      62058

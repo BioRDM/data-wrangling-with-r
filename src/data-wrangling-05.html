@@ -174,7 +174,6 @@ pre code {
 
 <p>We continue our work with the data, now we will focus on Sampling sites file generation</p>
 <p>This and the following R-Markdown notebooks have been inspired by our real data curation work for the project about monitoring COVID virus levels in waste water around Scotland (<a href="https://biordm.github.io/COVID-Wastewater-Scotland/">see project page</a>).</p>
-<p>Firstly, read our renamed data.</p>
 <div id="reading-the-data-files-after-loading-necessary-libraries" class="section level2">
 <h2>Reading the data files after loading necessary libraries</h2>
 <p>We need to read the curated_site_coordinate_data.csv and curated_population_data.csv files first</p>
@@ -206,8 +205,8 @@ glimpse(site_coordinates)</code></pre>
 ## Columns: 4
 ## $ Health_Board &lt;chr&gt; &quot;Highland&quot;, &quot;Lanarkshire&quot;, &quot;Lanarkshire&quot;, &quot;Forth Valley&quot;,…
 ## $ Site         &lt;chr&gt; &quot;Allanfearn&quot;, &quot;Allers&quot;, &quot;Allers - St Leonards&quot;, &quot;Alloa&quot;, …
-## $ Latitude_dd  &lt;dbl&gt; 847455.4, 656127.6, 656127.6, 691819.1, 869016.4, 696609.…
-## $ Longitude_dd &lt;dbl&gt; 271126.4, 266192.0, 266192.0, 288662.0, 267475.6, 287349.…</code></pre>
+## $ Latitude     &lt;dbl&gt; 847455.4, 656127.6, 656127.6, 691819.1, 869016.4, 696609.…
+## $ Longitude    &lt;dbl&gt; 271126.4, 266192.0, 266192.0, 288662.0, 267475.6, 287349.…</code></pre>
 <pre class="r"><code>glimpse(site_population)</code></pre>
 <pre><code>## Rows: 162
 ## Columns: 4
@@ -215,9 +214,11 @@ glimpse(site_coordinates)</code></pre>
 ## $ Site            &lt;chr&gt; &quot;Allanfearn&quot;, &quot;Allers&quot;, &quot;Allers - St Leonards&quot;, &quot;Alloa…
 ## $ Population_Band &lt;chr&gt; &quot;10k - 100k&quot;, &quot;10k - 100k&quot;, &quot;10k - 100k&quot;, &quot;10k - 100k&quot;…
 ## $ Population      &lt;int&gt; 62058, 30137, 30137, 34758, 9287, 5243, 8256, 46376, 1…</code></pre>
-<p>We can use command <code>glimpse</code> to see all the columns (variables) and first data in each column. As we can see the Latitude_dd and Longitude_dd measurements are in different system (UK grid). Now we need to convert geographic locations into GPS DD unit</p>
-<pre class="r"><code>locs &lt;- sgo_points(site_coordinates, coords=c(&quot;Longitude_dd&quot;, &quot;Latitude_dd&quot;), epsg=27700)
-Data_sgo_4326 &lt;- sgo_bng_lonlat(locs, to=4326)
+<p>We can use command <code>glimpse</code> to see all the columns (variables) and first data in each column.</p>
+<p>As we can see the Latitude and Longitude measurements are in different system (UK grid). Now we need to convert geographic locations into GPS DD unit. The function “sgo_points” in “sgo” library take the “Longitude” and “Latitude” from site_coordinates which is in UK grid system (specified by espg: 27700) and converts to an object of class sgo_points.</p>
+<pre class="r"><code>locs &lt;- sgo_points(site_coordinates, coords=c(&quot;Longitude&quot;, &quot;Latitude&quot;), epsg=27700)</code></pre>
+<p>Now we can use the function “sgo_bng_lonlat” from “sgo” library that converts Ordnance Survey grid reference easting/northing coordinates to GCS longitude/latitude. The “to=4326” in the function specifies epsg code. EPSG Geodetic Parameter Dataset (also EPSG registry) is a public registry of geodetic datums, spatial reference systems, Earth ellipsoids, coordinate transformations and related units of measurement. EPSG:4326 - WGS 84, latitude/longitude coordinate system based on the Earth’s center of mass, used by the Global Positioning System among others.</p>
+<pre class="r"><code>Data_sgo_4326 &lt;- sgo_bng_lonlat(locs, to=4326)
 Data_4326 &lt;- as.data.frame(Data_sgo_4326)
 head(Data_4326)</code></pre>
 <pre><code>##           x        y Health_Board                 Site
@@ -227,7 +228,7 @@ head(Data_4326)</code></pre>
 ## 4 -3.791724 56.10611 Forth Valley                Alloa
 ## 5 -4.224770 57.69137     Highland               Alness
 ## 6 -3.814850 56.14882 Forth Valley                 Alva</code></pre>
-<p>The function sgo_points from “sgo” library converts UK grid system co-ordinates to GPS DD unit. We can see the Longitude_dd column is now named as x and Latitude_dd column as y. We need to rename those</p>
+<p>We can see that the Column names needs to be changed. x here means Longitude_dd and y means Latitude_dd. Let’s change that.</p>
 <pre class="r"><code>colnames(Data_4326) = c(&quot;Longitude_dd&quot;, &quot;Latitude_dd&quot;, &quot;Health_Board&quot;,&quot;Site&quot;)
 head(Data_4326)</code></pre>
 <pre><code>##   Longitude_dd Latitude_dd Health_Board                 Site
@@ -254,25 +255,26 @@ head(merged)</code></pre>
 ## 4    56.10611   Forth Valley
 ## 5    57.69137       Highland
 ## 6    56.14882   Forth Valley</code></pre>
-<p>As we know that there are Health_Board information in both site_population and Data_4326. So when these are merged we can see two columns Health_Board.x from site_population and Health_Board.y from Data_4326. We need to select one of these columns as both are the same.</p>
-<pre class="r"><code>merged &lt;- select(merged,Site,Health_Board.x,Latitude_dd,Longitude_dd,Population,Population_Band) 
+<p>As we know that there are Health_Board information in both site_population and Data_4326. So when these are merged we can see two columns Health_Board.x from site_population and Health_Board.y from Data_4326. We need to select one of these columns as both are the same. We can avoid the column 3 that is “Health_Board” in Data_4326 while merging and check how it looks.</p>
+<pre class="r"><code>merged &lt;- merge( site_population, Data_4326[,c(1,2,4)],by = &quot;Site&quot;)
 head(merged)</code></pre>
-<pre><code>##                   Site Health_Board.x Latitude_dd Longitude_dd Population
-## 1           Allanfearn       Highland    57.49890    -4.152111      62058
-## 2               Allers    Lanarkshire    55.77989    -4.135031      30137
-## 3 Allers - St Leonards    Lanarkshire    55.77989    -4.135031      30137
-## 4                Alloa   Forth Valley    56.10611    -3.791724      34758
-## 5               Alness       Highland    57.69137    -4.224770       9287
-## 6                 Alva   Forth Valley    56.14882    -3.814850       5243
-##   Population_Band
-## 1      10k - 100k
-## 2      10k - 100k
-## 3      10k - 100k
-## 4      10k - 100k
-## 5        4k - 10k
-## 6        4k - 10k</code></pre>
-<p>Now let’s rename the column Health_Board.x to Health.Board</p>
-<pre class="r"><code>colnames(merged)[2] &lt;- &#39;Health_Board&#39;
+<pre><code>##                   Site Health_Board Population_Band Population Longitude_dd
+## 1           Allanfearn     Highland      10k - 100k      62058    -4.152111
+## 2               Allers  Lanarkshire      10k - 100k      30137    -4.135031
+## 3 Allers - St Leonards  Lanarkshire      10k - 100k      30137    -4.135031
+## 4                Alloa Forth Valley      10k - 100k      34758    -3.791724
+## 5               Alness     Highland        4k - 10k       9287    -4.224770
+## 6                 Alva Forth Valley        4k - 10k       5243    -3.814850
+##   Latitude_dd
+## 1    57.49890
+## 2    55.77989
+## 3    55.77989
+## 4    56.10611
+## 5    57.69137
+## 6    56.14882</code></pre>
+<p>Now we need to arrange the columns in specific order as : Site, Health_Board, Latitude_dd, Longitude_dd, Population, Population_Band. We can do it by simply rearranging by column numbers or using the “select” function</p>
+<pre class="r"><code>merged &lt;- merged[,c(1,2,6,5,4,3)]
+#merged &lt;- select(merged,Site,Health_Board,Latitude_dd,Longitude_dd,Population,Population_Band) 
 head(merged)</code></pre>
 <pre><code>##                   Site Health_Board Latitude_dd Longitude_dd Population
 ## 1           Allanfearn     Highland    57.49890    -4.152111      62058
@@ -288,7 +290,7 @@ head(merged)</code></pre>
 ## 4      10k - 100k
 ## 5        4k - 10k
 ## 6        4k - 10k</code></pre>
-<p>Now the file is ready. We can create the out directory if it doesn’t exist and save the file</p>
+<p>The file is ready. We can create the out directory if it doesn’t exist and save the file</p>
 <pre class="r"><code>if (!file.exists(&#39;../out&#39;)) {
   dir.create(file.path(&#39;..&#39;, &#39;out&#39;))  
 }

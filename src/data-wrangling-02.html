@@ -175,7 +175,7 @@ pre code {
 <p>We continue our work with the data, now we will focus on actual data entries.</p>
 <p>We are going to fix some of the typical problems with real data.</p>
 <p>This and the following R-Markdown notebooks have been inspired by our real data curation work for the project about monitoring COVID virus levels in waste water around Scotland (<a href="https://biordm.github.io/COVID-Wastewater-Scotland/">see project page</a>).</p>
-<p>Firstly, read our renamed data.</p>
+<p>Firstly, read our renamed data. Some of the column names of renamed_data contains character “-” . The check.names= F option in read.csv function will read the file as it is. Unless given, R will convert hyphen as dot.</p>
 <div id="inspecting-data" class="section level2">
 <h2>Inspecting DATA</h2>
 <pre class="r"><code>library(dplyr)</code></pre>
@@ -187,7 +187,13 @@ pre code {
 <pre><code>## The following objects are masked from &#39;package:base&#39;:
 ## 
 ##     intersect, setdiff, setequal, union</code></pre>
-<pre class="r"><code>renamed_data&lt;- read.csv(&quot;../data/renamed_data.csv&quot;)
+<pre class="r"><code>library(lubridate)</code></pre>
+<pre><code>## 
+## Attaching package: &#39;lubridate&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:base&#39;:
+## 
+##     date, intersect, setdiff, union</code></pre>
+<pre class="r"><code>renamed_data&lt;- read.csv(&quot;../data/renamed_data.csv&quot;,check.names = F)
 glimpse(renamed_data)</code></pre>
 <pre><code>## Rows: 10,316
 ## Columns: 19
@@ -197,16 +203,16 @@ glimpse(renamed_data)</code></pre>
 ## $ Date_analysed                          &lt;chr&gt; &quot;22/02/2021&quot;, &quot;25/02/2021&quot;, &quot;03…
 ## $ SW_sample_number                       &lt;int&gt; 14725793, 14725796, 14725799, 1…
 ## $ N1_description                         &lt;chr&gt; &quot;Positive&quot;, &quot;Positive&quot;, &quot;Positi…
-## $ N1_Reported_value.gc_per_L             &lt;int&gt; 85619, 75691, 42624, 12468, 135…
-## $ N1_Repl_1.gc_per_L                     &lt;dbl&gt; 85736.76, 77788.09, 41922.98, 1…
-## $ N1_Repl_2.gc_per_L                     &lt;dbl&gt; 85501.84, 73594.68, 43325.61, 1…
-## $ N1_Repl_3.gc_per_L                     &lt;dbl&gt; NA, NA, NA, NA, NA, NA, NA, NA,…
+## $ `N1_Reported_value-gc_per_L`           &lt;int&gt; 85619, 75691, 42624, 12468, 135…
+## $ `N1_Repl_1-gc_per_L`                   &lt;dbl&gt; 85736.76, 77788.09, 41922.98, 1…
+## $ `N1_Repl_2-gc_per_L`                   &lt;dbl&gt; 85501.84, 73594.68, 43325.61, 1…
+## $ `N1_Repl_3-gc_per_L`                   &lt;dbl&gt; NA, NA, NA, NA, NA, NA, NA, NA,…
 ## $ Calculated_mean                        &lt;dbl&gt; 85619.30, 75691.39, 42624.30, 1…
 ## $ Standard_Deviation                     &lt;dbl&gt; 166.12, 2965.19, 991.81, 1221.4…
-## $ Flow_L_per_day                         &lt;int&gt; 19094400, 9763200, 6393600, NA,…
-## $ Ammonia_mg_per_L                       &lt;dbl&gt; 14.84, 11.31, 16.37, 21.18, 10.…
+## $ `Flow-L_per_day`                       &lt;int&gt; 19094400, 9763200, 6393600, NA,…
+## $ `Ammonia-mg_per_L`                     &lt;dbl&gt; 14.84, 11.31, 16.37, 21.18, 10.…
 ## $ pH_value                               &lt;dbl&gt; NA, NA, NA, NA, NA, NA, NA, NA,…
-## $ Modelled_flow.L_per_day                &lt;int&gt; 9733698, 11381460, 9199052, 793…
+## $ `Modelled_flow-L_per_day`              &lt;int&gt; 9733698, 11381460, 9199052, 793…
 ## $ Million_gene_copies_per_person_per_day &lt;dbl&gt; 119.42, 53.98, 19.91, 7.22, 11.…
 ## $ Analysis_lab                           &lt;chr&gt; &quot;SEPA&quot;, &quot;SEPA&quot;, &quot;SEPA&quot;, &quot;SEPA&quot;,…
 ## $ Row_Count                              &lt;int&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1…</code></pre>
@@ -314,43 +320,32 @@ One differs by having a space after the name.</p>
 <div id="counting-the-measurements-for-each-sites" class="section level1">
 <h1>Counting the measurements for each sites</h1>
 <p>We will first use the ‘aggregate’ function in base R to count the occurrence of each site</p>
-<pre class="r"><code>site_count &lt;- aggregate(renamed_data, by=list(renamed_data$Site), FUN=length) 
-glimpse(site_count)</code></pre>
-<pre><code>## Rows: 174
-## Columns: 20
-## $ Group.1                                &lt;chr&gt; &quot;Allanfearn&quot;, &quot;Allanfearn &quot;, &quot;A…
-## $ Health_Board                           &lt;int&gt; 260, 1, 45, 8, 118, 10, 75, 75,…
-## $ Site                                   &lt;int&gt; 260, 1, 45, 8, 118, 10, 75, 75,…
-## $ Date_collected                         &lt;int&gt; 260, 1, 45, 8, 118, 10, 75, 75,…
-## $ Date_analysed                          &lt;int&gt; 260, 1, 45, 8, 118, 10, 75, 75,…
-## $ SW_sample_number                       &lt;int&gt; 260, 1, 45, 8, 118, 10, 75, 75,…
-## $ N1_description                         &lt;int&gt; 260, 1, 45, 8, 118, 10, 75, 75,…
-## $ N1_Reported_value.gc_per_L             &lt;int&gt; 260, 1, 45, 8, 118, 10, 75, 75,…
-## $ N1_Repl_1.gc_per_L                     &lt;int&gt; 260, 1, 45, 8, 118, 10, 75, 75,…
-## $ N1_Repl_2.gc_per_L                     &lt;int&gt; 260, 1, 45, 8, 118, 10, 75, 75,…
-## $ N1_Repl_3.gc_per_L                     &lt;int&gt; 260, 1, 45, 8, 118, 10, 75, 75,…
-## $ Calculated_mean                        &lt;int&gt; 260, 1, 45, 8, 118, 10, 75, 75,…
-## $ Standard_Deviation                     &lt;int&gt; 260, 1, 45, 8, 118, 10, 75, 75,…
-## $ Flow_L_per_day                         &lt;int&gt; 260, 1, 45, 8, 118, 10, 75, 75,…
-## $ Ammonia_mg_per_L                       &lt;int&gt; 260, 1, 45, 8, 118, 10, 75, 75,…
-## $ pH_value                               &lt;int&gt; 260, 1, 45, 8, 118, 10, 75, 75,…
-## $ Modelled_flow.L_per_day                &lt;int&gt; 260, 1, 45, 8, 118, 10, 75, 75,…
-## $ Million_gene_copies_per_person_per_day &lt;int&gt; 260, 1, 45, 8, 118, 10, 75, 75,…
-## $ Analysis_lab                           &lt;int&gt; 260, 1, 45, 8, 118, 10, 75, 75,…
-## $ Row_Count                              &lt;int&gt; 260, 1, 45, 8, 118, 10, 75, 75,…</code></pre>
+<pre class="r"><code>site_count &lt;- aggregate(renamed_data$Site, by=list(renamed_data$Site), FUN=length) 
+head(site_count)</code></pre>
+<pre><code>##                Group.1   x
+## 1           Allanfearn 260
+## 2          Allanfearn    1
+## 3               Allers  45
+## 4 Allers - St Leonards   8
+## 5                Alloa 118
+## 6               Alness  10</code></pre>
 <p>As we can see aggregate function calculates the count of each Site in the renamed_data. ‘FUN=length’ is used to calculate the count.</p>
 <p>We can see that there are 12, sites which are misspelled.</p>
 <p>Out of which 8 are with close but not identical names : “Carbarn”,“hatton - Fintry West”,“Invurie”,“Langhlm”,“Philiphill”,“Sheildhall”,“Stevenson”, “Stevenson - Stevenston West” . Four of them differs by having a space after the name: “Allanfearn”,“Fort William”,“Galashiels”, “Perth”</p>
-<p>We can also use another method for aggregation of counts ie. group_by function from the library dplyr</p>
-<pre class="r"><code>library (dplyr)
-site_count &lt;- renamed_data %&gt;% 
+<p>We can also use another method for aggregation of counts ie. group_by function from the library “dplyr”</p>
+<pre class="r"><code>site_count &lt;- renamed_data %&gt;% 
 group_by(Site) %&gt;% 
 summarize(&quot;Count&quot; = n())  
-glimpse(site_count)</code></pre>
-<pre><code>## Rows: 174
-## Columns: 2
-## $ Site  &lt;chr&gt; &quot;Allanfearn&quot;, &quot;Allanfearn &quot;, &quot;Allers&quot;, &quot;Allers - St Leonards&quot;, &quot;…
-## $ Count &lt;int&gt; 260, 1, 45, 8, 118, 10, 75, 75, 79, 77, 46, 60, 86, 87, 14, 87, …</code></pre>
+head(site_count)</code></pre>
+<pre><code>## # A tibble: 6 × 2
+##   Site                   Count
+##   &lt;chr&gt;                  &lt;int&gt;
+## 1 &quot;Allanfearn&quot;             260
+## 2 &quot;Allanfearn &quot;              1
+## 3 &quot;Allers&quot;                  45
+## 4 &quot;Allers - St Leonards&quot;     8
+## 5 &quot;Alloa&quot;                  118
+## 6 &quot;Alness&quot;                  10</code></pre>
 <p>The data is grouped by Site and summarized based on count of each distinct Site using pipe operator (%&gt;%) in dplyr package. Pipes let you take the output of one function and send it directly to the next, which is useful when you need to many things to the same data set. Pipes in R look like %&gt;% and are made available via the magrittr package installed as part of dplyr.</p>
 <p>In the above we use the pipe to send the renamed data set first through group_by() function, to get Sites grouped by name , and then through summarize() to count the number of occurrences of each Site. When the data frame is being passed to the group_by() and summarize() functions through a pipe, we don’t need to include it as an argument to these functions anymore.</p>
 </div>
@@ -379,8 +374,7 @@ filter(site_count, Count &lt;5)</code></pre>
 <p>We can see from above the list of sites which are having counts less than 5. These are the sites which are suspected to be wrong. But we need to always check with the data file whether there is an issue with the site names. Upon close inspection we can spot that “Nigg - Aberdeen RI” and “Philipshill - Hairmyres Hospital” are genuine sites. So we need to avoid them from filtering out.</p>
 <p>All other sites can be easily determined as misspelled. For example “Allanfearn” with space at the end should be actually be “Allanfearn” and “Carbarn” should be actually included with “Carbarns”.</p>
 <p>Let’s do the filtering again keeping the genuine sites.</p>
-<pre class="r"><code>library (dplyr)
-filter(site_count, Count &lt;5,Site != &quot;Nigg - Aberdeen RI&quot;, Site != &quot;Philipshill - Hairmyres Hospital&quot;)</code></pre>
+<pre class="r"><code>filter(site_count, Count &lt;5,Site != &quot;Nigg - Aberdeen RI&quot;, Site != &quot;Philipshill - Hairmyres Hospital&quot;)</code></pre>
 <pre><code>## # A tibble: 12 × 2
 ##    Site                          Count
 ##    &lt;chr&gt;                         &lt;int&gt;
@@ -430,13 +424,11 @@ wrong_sites</code></pre>
 <div id="use-recode-function-to-replace-the-misspelled-names" class="section level2">
 <h2>Use recode function to replace the misspelled names</h2>
 <p>We can see the dictionary approach is not helpful to replace all the matches. Let’s try with recode function in dplyr library</p>
-<pre class="r"><code>library (dplyr)
-curated_data &lt;- renamed_data
+<pre class="r"><code>curated_data &lt;- renamed_data
 curated_data$Site &lt;-
   recode(curated_data$Site, &quot;Allanfearn &quot;= &quot;Allanfearn&quot;, &quot;Carbarn&quot;=&quot;Carbarns&quot; ,&quot;Fort William &quot;=&quot;Fort William&quot;,&quot;Galashiels &quot;=&quot;Galashiels&quot;,&quot;hatton - Fintry West&quot; = &quot;Hatton - Fintry West&quot;, &quot;Invurie&quot;=&quot;Inverurie&quot;, &quot;Langhlm&quot;=&quot;Langholm&quot;,&quot;Perth &quot;=&quot;Perth&quot;,&quot;Philiphill&quot;=&quot;Philipshill&quot;,&quot;Sheildhall&quot;=&quot;Shieldhall&quot;,&quot;Stevenson&quot;=&quot;Stevenston&quot;,&quot;Stevenson - Stevenston West&quot;=&quot;Stevenston - Stevenston West&quot;)</code></pre>
 <p>Let’s now find out the wrong sites if any exists</p>
-<pre class="r"><code>library (dplyr)
-site_count &lt;- curated_data %&gt;% 
+<pre class="r"><code>site_count &lt;- curated_data %&gt;% 
 group_by(Site) %&gt;% 
 summarize(&quot;Count&quot; = n())  
 site_count</code></pre>
@@ -470,8 +462,7 @@ wrong_sites</code></pre>
 <pre><code>## [1] &quot;Analysis Failed&quot; &quot;neg&quot;             &quot;negative&quot;        &quot;Negative&quot;       
 ## [5] &quot;Positive&quot;        &quot;Positive (DNQ)&quot;  &quot;Possitive&quot;       &quot;Weak Positive&quot;</code></pre>
 <p>As we can clearly see from the above printed result, “neg”,“negative” and “Possitive” are the misspelled description. We can use the recode function again to replace all these.</p>
-<pre class="r"><code>library (dplyr)
-curated_data$N1_description &lt;-recode(curated_data$N1_description,&quot;negative&quot; = &quot;Negative&quot;, &quot;neg&quot; = &quot;Negative&quot;, &quot;Possitive&quot;=&quot;Positive&quot;) </code></pre>
+<pre class="r"><code>curated_data$N1_description &lt;-recode(curated_data$N1_description,&quot;negative&quot; = &quot;Negative&quot;, &quot;neg&quot; = &quot;Negative&quot;, &quot;Possitive&quot;=&quot;Positive&quot;) </code></pre>
 <p>Now lets check again whether it is changed</p>
 <pre class="r"><code>levels(as.factor(curated_data$N1_description))</code></pre>
 <pre><code>## [1] &quot;Analysis Failed&quot; &quot;Negative&quot;        &quot;Positive&quot;        &quot;Positive (DNQ)&quot; 
@@ -486,13 +477,7 @@ curated_data$N1_description &lt;-recode(curated_data$N1_description,&quot;negati
 <p>Firstly, Lets check the current date format of our curated_data file</p>
 <pre class="r"><code>glimpse(curated_data$Date_collected)</code></pre>
 <pre><code>##  chr [1:10316] &quot;19/02/2021&quot; &quot;23/02/2021&quot; &quot;01/03/2021&quot; &quot;08/03/2021&quot; ...</code></pre>
-<p>We can see that the date format is DD/MM/YYYY. So we can use dmy function from lubridate package to convert the dates to YYYY-MM-DD format. In other words dmy is a Lubridate’s parse function which converts the dates arranged in DD/MM/YYYY format to iso format.</p>
-<pre class="r"><code>library(lubridate)</code></pre>
-<pre><code>## 
-## Attaching package: &#39;lubridate&#39;</code></pre>
-<pre><code>## The following objects are masked from &#39;package:base&#39;:
-## 
-##     date, intersect, setdiff, union</code></pre>
+<p>We can see that the date format is DD/MM/YYYY. So we can use dmy function from lubridate package to convert the dates to YYYY-MM-DD format. In other words dmy is a lubridate’s parse function which converts the dates arranged in DD/MM/YYYY format to iso format.</p>
 <pre class="r"><code>curated_data$Date_analysed&lt;- dmy(curated_data$Date_analysed) #Change the date format to YYYY-MM-DD</code></pre>
 <pre><code>## Warning: 856 failed to parse.</code></pre>
 <pre class="r"><code>curated_data$Date_collected&lt;- dmy(curated_data$Date_collected) #Change the date format to YYYY-MM-DD
@@ -505,16 +490,16 @@ glimpse(curated_data)</code></pre>
 ## $ Date_analysed                          &lt;date&gt; 2021-02-22, 2021-02-25, 2021-0…
 ## $ SW_sample_number                       &lt;int&gt; 14725793, 14725796, 14725799, 1…
 ## $ N1_description                         &lt;chr&gt; &quot;Positive&quot;, &quot;Positive&quot;, &quot;Positi…
-## $ N1_Reported_value.gc_per_L             &lt;int&gt; 85619, 75691, 42624, 12468, 135…
-## $ N1_Repl_1.gc_per_L                     &lt;dbl&gt; 85736.76, 77788.09, 41922.98, 1…
-## $ N1_Repl_2.gc_per_L                     &lt;dbl&gt; 85501.84, 73594.68, 43325.61, 1…
-## $ N1_Repl_3.gc_per_L                     &lt;dbl&gt; NA, NA, NA, NA, NA, NA, NA, NA,…
+## $ `N1_Reported_value-gc_per_L`           &lt;int&gt; 85619, 75691, 42624, 12468, 135…
+## $ `N1_Repl_1-gc_per_L`                   &lt;dbl&gt; 85736.76, 77788.09, 41922.98, 1…
+## $ `N1_Repl_2-gc_per_L`                   &lt;dbl&gt; 85501.84, 73594.68, 43325.61, 1…
+## $ `N1_Repl_3-gc_per_L`                   &lt;dbl&gt; NA, NA, NA, NA, NA, NA, NA, NA,…
 ## $ Calculated_mean                        &lt;dbl&gt; 85619.30, 75691.39, 42624.30, 1…
 ## $ Standard_Deviation                     &lt;dbl&gt; 166.12, 2965.19, 991.81, 1221.4…
-## $ Flow_L_per_day                         &lt;int&gt; 19094400, 9763200, 6393600, NA,…
-## $ Ammonia_mg_per_L                       &lt;dbl&gt; 14.84, 11.31, 16.37, 21.18, 10.…
+## $ `Flow-L_per_day`                       &lt;int&gt; 19094400, 9763200, 6393600, NA,…
+## $ `Ammonia-mg_per_L`                     &lt;dbl&gt; 14.84, 11.31, 16.37, 21.18, 10.…
 ## $ pH_value                               &lt;dbl&gt; NA, NA, NA, NA, NA, NA, NA, NA,…
-## $ Modelled_flow.L_per_day                &lt;int&gt; 9733698, 11381460, 9199052, 793…
+## $ `Modelled_flow-L_per_day`              &lt;int&gt; 9733698, 11381460, 9199052, 793…
 ## $ Million_gene_copies_per_person_per_day &lt;dbl&gt; 119.42, 53.98, 19.91, 7.22, 11.…
 ## $ Analysis_lab                           &lt;chr&gt; &quot;SEPA&quot;, &quot;SEPA&quot;, &quot;SEPA&quot;, &quot;SEPA&quot;,…
 ## $ Row_Count                              &lt;int&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1…</code></pre>
@@ -534,9 +519,9 @@ glimpse(curated_data)</code></pre>
 </div>
 <div id="number" class="section level1">
 <h1>Number</h1>
-<p>Now we can check for the summary of data value column to find if any values are negative</p>
-<pre class="r"><code>summary(select(curated_data,N1_Reported_value.gc_per_L,N1_Repl_1.gc_per_L ,N1_Repl_2.gc_per_L ,N1_Repl_3.gc_per_L ,Calculated_mean,Standard_Deviation,Flow_L_per_day ,Ammonia_mg_per_L, pH_value ,Modelled_flow.L_per_day , Million_gene_copies_per_person_per_day))</code></pre>
-<pre><code>##  N1_Reported_value.gc_per_L N1_Repl_1.gc_per_L N1_Repl_2.gc_per_L
+<p>Now we can check for the summary of data value column to find if any values are negative. The column names containing character “-” should be given in double quotes. Other wise R can’t read that.</p>
+<pre class="r"><code>summary(select(curated_data,&quot;N1_Reported_value-gc_per_L&quot;,&quot;N1_Repl_1-gc_per_L&quot; ,&quot;N1_Repl_2-gc_per_L&quot;,&quot;N1_Repl_3-gc_per_L&quot; ,Calculated_mean,Standard_Deviation,&quot;Flow-L_per_day&quot;,&quot;Ammonia-mg_per_L&quot;, pH_value ,&quot;Modelled_flow-L_per_day&quot; , Million_gene_copies_per_person_per_day))</code></pre>
+<pre><code>##  N1_Reported_value-gc_per_L N1_Repl_1-gc_per_L N1_Repl_2-gc_per_L
 ##  Min.   :       0           Min.   :       0   Min.   :       0  
 ##  1st Qu.:    5033           1st Qu.:    9881   1st Qu.:   10225  
 ##  Median :   32472           Median :   40894   Median :   42403  
@@ -544,7 +529,7 @@ glimpse(curated_data)</code></pre>
 ##  3rd Qu.:  105511           3rd Qu.:  115491   3rd Qu.:  119002  
 ##  Max.   :44103857           Max.   :47601196   Max.   :40606520  
 ##  NA&#39;s   :619                NA&#39;s   :1531       NA&#39;s   :1717      
-##  N1_Repl_3.gc_per_L  Calculated_mean    Standard_Deviation Flow_L_per_day     
+##  N1_Repl_3-gc_per_L  Calculated_mean    Standard_Deviation Flow-L_per_day     
 ##  Min.   :     15.9   Min.   :       0   Min.   :      0    Min.   :   134784  
 ##  1st Qu.:   2963.8   1st Qu.:    9606   1st Qu.:   1332    1st Qu.:  7663680  
 ##  Median :  12405.0   Median :   40606   Median :   4316    Median : 25056000  
@@ -552,7 +537,7 @@ glimpse(curated_data)</code></pre>
 ##  3rd Qu.:  42654.2   3rd Qu.:  115785   3rd Qu.:  12649    3rd Qu.: 83419200  
 ##  Max.   :1137068.6   Max.   :44103858   Max.   :4945983    Max.   :491616000  
 ##  NA&#39;s   :9576        NA&#39;s   :1437       NA&#39;s   :1737       NA&#39;s   :7081       
-##  Ammonia_mg_per_L    pH_value     Modelled_flow.L_per_day
+##  Ammonia-mg_per_L    pH_value     Modelled_flow-L_per_day
 ##  Min.   :  0.20   Min.   :6.300   Min.   :   306302      
 ##  1st Qu.: 12.78   1st Qu.:7.100   1st Qu.:  4025871      
 ##  Median : 18.98   Median :7.200   Median :  8952235      
@@ -580,7 +565,7 @@ glimpse(unique(select(curated_data,Health_Board,Site)))</code></pre>
 ## $ Health_Board &lt;chr&gt; &quot;Highland&quot;, &quot;(Empty)&quot;, &quot;Lanarkshire&quot;, &quot;(Empty)&quot;, &quot;Forth V…
 ## $ Site         &lt;chr&gt; &quot;Allanfearn&quot;, &quot;Allanfearn&quot;, &quot;Allers&quot;, &quot;Allers - St Leonar…</code></pre>
 <p>Here we can clearly see that many sites are having missing Health board information. For example the site: “Allers - St Leonards” is having Health board entered as “(Empty)” but the actual Health board is “Lanakshire” the same one as for “Allers”. As the Sites are sorted alphabetically , now we can write a code to fill in the missing Health board information corresponding to each site.</p>
-<pre class="r"><code>for (i in 1:10316) {ifelse (curated_data$Health_Board[i] != &quot;(Empty)&quot;, x &lt;- curated_data$Health_Board[i],curated_data$Health_Board[i]&lt;-x)}</code></pre>
+<pre class="r"><code>for (i in 1:nrow(curated_data)) {ifelse (curated_data$Health_Board[i] != &quot;(Empty)&quot;, x &lt;- curated_data$Health_Board[i],curated_data$Health_Board[i]&lt;-x)}</code></pre>
 <p>For each row, if the value of the Health board is there it is kept as such but if it is missing, it is populated from preceding non empty health board information.</p>
 <p>The for statement is for looping through each row(there are 10316 rows here). While looping through each row, if the value of the health board is not “(Empty)”, the value is stored in to a variable x and whenever the Health board value is “(Empty)” the value stored in the variable is used to replace it.</p>
 <p>Lets try to print again the unique Health board and Site combination to know whether the problem is fixed</p>

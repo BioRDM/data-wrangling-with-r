@@ -175,11 +175,7 @@ pre code {
 <p>We continue our work with the data, now we will focus on the site coordinate file.</p>
 <p>We are going to fix some of the typical problems with real data.</p>
 <p>This and the following R-Markdown notebooks have been inspired by our real data curation work for the project about monitoring COVID virus levels in waste water around Scotland (<a href="https://biordm.github.io/COVID-Wastewater-Scotland/">see project page</a>).</p>
-<p>Firstly, we will read our site coordinates data and check the number of rows</p>
-<pre class="r"><code>site_data &lt;- read.csv(&quot;../raw_data/Sites_coordinates.csv&quot;)
-nrow(site_data)</code></pre>
-<pre><code>## [1] 124</code></pre>
-<p>Now we can read the unique site names in curated data file and check for the number of sites.</p>
+<p>Firstly, we will read our site coordinates data and check the number of Sites in it.</p>
 <pre class="r"><code>library(dplyr)</code></pre>
 <pre><code>## 
 ## Attaching package: &#39;dplyr&#39;</code></pre>
@@ -189,12 +185,81 @@ nrow(site_data)</code></pre>
 <pre><code>## The following objects are masked from &#39;package:base&#39;:
 ## 
 ##     intersect, setdiff, setequal, union</code></pre>
-<pre class="r"><code>curated_data &lt;- read.csv(&quot;../data/curated_data.csv&quot;)
-site_unique&lt;-unique(select(curated_data,Health_Board,Site))
-nrow(site_unique)</code></pre>
+<pre class="r"><code>site_data &lt;- read.csv(&quot;../raw_data/Sites_coordinates.csv&quot;)
+head (site_data)</code></pre>
+<pre><code>##          Health.Area   Site.Name      Lat     Long
+## 1 Ayrshire and Arran     Cumnock 620407.3 255829.2
+## 2 Ayrshire and Arran    Muirkirk 626364.3 267698.5
+## 3 Ayrshire and Arran New Cumnock 613986.3 262184.2
+## 4 Ayrshire and Arran     Fairlie 655930.4 220705.8
+## 5 Ayrshire and Arran       Largs 662381.9 219430.8
+## 6 Ayrshire and Arran  Meadowhead 635857.5 233866.8</code></pre>
+<p>Since each row corresponds to a site. We can do a count of rows for this using the R base function “nrow”</p>
+<pre class="r"><code>nrow(site_data)</code></pre>
+<pre><code>## [1] 124</code></pre>
+<p>Now we can read the curated data file and check how it looks. As some of the column names contain “-” character, check.names = F option can be included while reading the file. Unless we include this option the hyphen is converted in to a dot character in column names.</p>
+<pre class="r"><code>curated_data &lt;- read.csv(&quot;../data/curated_data.csv&quot;,check.names = F)
+head(curated_data)</code></pre>
+<pre><code>##   Health_Board       Site Date_collected Date_analysed SW_sample_number
+## 1     Highland Allanfearn     2020-06-01          &lt;NA&gt;         13953443
+## 2     Highland Allanfearn     2020-06-02          &lt;NA&gt;         13953444
+## 3     Highland Allanfearn     2020-06-04          &lt;NA&gt;         13953445
+## 4     Highland Allanfearn     2020-06-08          &lt;NA&gt;         13953446
+## 5     Highland Allanfearn     2020-06-09          &lt;NA&gt;         13953447
+## 6     Highland Allanfearn     2020-06-10          &lt;NA&gt;         13953448
+##   N1_description N1_Reported_value-gc_per_L N1_Repl_1-gc_per_L
+## 1       Negative                          0                 NA
+## 2       Negative                          0                 NA
+## 3       Negative                          0                 NA
+## 4       Negative                          0                 NA
+## 5       Negative                          0                 NA
+## 6       Negative                          0                945
+##   N1_Repl_2-gc_per_L N1_Repl_3-gc_per_L Calculated_mean Standard_Deviation
+## 1                 NA                 NA              NA                 NA
+## 2                 NA                 NA              NA                 NA
+## 3                 NA                 NA              NA                 NA
+## 4                 NA                 NA              NA                 NA
+## 5                 NA                 NA              NA                 NA
+## 6                 NA                 NA             945                 NA
+##   Flow-L_per_day Ammonia-mg_per_L pH_value Modelled_flow-L_per_day
+## 1       19353600               NA       NA                      NA
+## 2       17020800               NA       NA                      NA
+## 3       22204800               NA       NA                      NA
+## 4       25228800               NA       NA                      NA
+## 5       24537600               NA       NA                      NA
+## 6       27820800               NA       NA                      NA
+##   Million_gene_copies_per_person_per_day Analysis_lab Row_Count
+## 1                                      0         SEPA         1
+## 2                                      0         SEPA         1
+## 3                                      0         SEPA         1
+## 4                                      0         SEPA         1
+## 5                                      0         SEPA         1
+## 6                                      0         SEPA         1</code></pre>
+<p>We see the curated data file has several records for each Health_Board and Site combination. We need to determine how many distinct Sites exists. We can use “unique” function from R base for this. We can select only two columns Health_Board and Site and then determine the unique combinations. For selecting the Site and Health_Board we can select the first and second column.</p>
+<pre class="r"><code>site_unique&lt;-unique(curated_data[,1:2])
+head(site_unique)</code></pre>
+<pre><code>##     Health_Board                 Site
+## 1       Highland           Allanfearn
+## 262  Lanarkshire               Allers
+## 307  Lanarkshire Allers - St Leonards
+## 315 Forth Valley                Alloa
+## 433     Highland               Alness
+## 443 Forth Valley                 Alva</code></pre>
+<p>The same thing can also be accomplished by using “select” function in the library “dplyr”. The “select” function takes the data frame and column names to be selected as arguments.</p>
+<pre class="r"><code>site_unique&lt;-unique(select(curated_data,Health_Board,Site))
+head(site_unique)</code></pre>
+<pre><code>##     Health_Board                 Site
+## 1       Highland           Allanfearn
+## 262  Lanarkshire               Allers
+## 307  Lanarkshire Allers - St Leonards
+## 315 Forth Valley                Alloa
+## 433     Highland               Alness
+## 443 Forth Valley                 Alva</code></pre>
+<p>Okay. Now we can determine the number of sites in the curated data file by counting the rows</p>
+<pre class="r"><code>nrow(site_unique)</code></pre>
 <pre><code>## [1] 162</code></pre>
-<p>Clearly we can see a mismatch. The site coordinates file which we have is not complete. So we need to add the missing sites. Lets find now which all sites are missing from the Sites_coordinates.csv file.</p>
-<p>Lets have a look in to the Sites_coordinates.csv file</p>
+<p>Clearly we can see the mismatch in number of sites in both files. The Sites_coordinates.csv file which we have is not complete. So we need to add the missing sites. Lets find now which all sites are missing from the Sites_coordinates.csv file.</p>
+<p>Lets have a look again in to the Sites_coordinates.csv file</p>
 <pre class="r"><code>head(site_data)</code></pre>
 <pre><code>##          Health.Area   Site.Name      Lat     Long
 ## 1 Ayrshire and Arran     Cumnock 620407.3 255829.2
@@ -206,25 +271,25 @@ nrow(site_unique)</code></pre>
 <p>We need to firstly change the column names in to standard format. Let’s use a dictionary for this.</p>
 <pre class="r"><code>dictionary &lt;- data.frame(
   old_name = c(&quot;Health.Area&quot;,&quot;Site.Name&quot;,&quot;Lat&quot;,&quot;Long&quot;),
-  new_name = c(&quot;Health_Board&quot;,&quot;Site&quot;,&quot;Latitude_dd&quot;,&quot;Longitude_dd&quot;)
+  new_name = c(&quot;Health_Board&quot;,&quot;Site&quot;,&quot;Latitude&quot;,&quot;Longitude&quot;)
 )
 renamed_site_data &lt;- site_data
 names(renamed_site_data)[match(dictionary$old_name, names(renamed_site_data))] &lt;- dictionary$new_name
 head(renamed_site_data)</code></pre>
-<pre><code>##         Health_Board        Site Latitude_dd Longitude_dd
-## 1 Ayrshire and Arran     Cumnock    620407.3     255829.2
-## 2 Ayrshire and Arran    Muirkirk    626364.3     267698.5
-## 3 Ayrshire and Arran New Cumnock    613986.3     262184.2
-## 4 Ayrshire and Arran     Fairlie    655930.4     220705.8
-## 5 Ayrshire and Arran       Largs    662381.9     219430.8
-## 6 Ayrshire and Arran  Meadowhead    635857.5     233866.8</code></pre>
-<p>Now we can inspect which sites are missing from the two files. Lets use anti_join function from dplyr package</p>
+<pre><code>##         Health_Board        Site Latitude Longitude
+## 1 Ayrshire and Arran     Cumnock 620407.3  255829.2
+## 2 Ayrshire and Arran    Muirkirk 626364.3  267698.5
+## 3 Ayrshire and Arran New Cumnock 613986.3  262184.2
+## 4 Ayrshire and Arran     Fairlie 655930.4  220705.8
+## 5 Ayrshire and Arran       Largs 662381.9  219430.8
+## 6 Ayrshire and Arran  Meadowhead 635857.5  233866.8</code></pre>
+<p>Now we can inspect which sites are missing from the two files. Lets use “anti_join” function from “dplyr” library. The “anti_join” function prints out the missing records in first file compared to second one.</p>
 <pre class="r"><code>anti_join(renamed_site_data,site_unique, by = &quot;Site&quot;)</code></pre>
-<pre><code>##   Health_Board        Site Latitude_dd Longitude_dd
-## 1      (Empty)  Auchinairn          NA           NA
-## 2      (Empty)     Newtown          NA           NA
-## 3      (Empty) St Andrews           NA           NA
-## 4      (Empty)   Steveston          NA           NA</code></pre>
+<pre><code>##   Health_Board        Site Latitude Longitude
+## 1      (Empty)  Auchinairn       NA        NA
+## 2      (Empty)     Newtown       NA        NA
+## 3      (Empty) St Andrews        NA        NA
+## 4      (Empty)   Steveston       NA        NA</code></pre>
 <pre class="r"><code>sites_extra &lt;- anti_join(site_unique,renamed_site_data, by = &quot;Site&quot;)
 sites_extra</code></pre>
 <pre><code>##                 Health_Board                              Site
@@ -270,43 +335,79 @@ sites_extra</code></pre>
 ## 40        Ayrshire and Arran      Stevenston - Stevenston East
 ## 41        Ayrshire and Arran      Stevenston - Stevenston West
 ## 42              Forth Valley             Stirling - University</code></pre>
-<p>The first table shows the list of sites which are present in the Site_Coordinates file but absent in the curated data site lists. So these are misspelled sites and needs to be removed. The second table shows the sites in curated data but not in Site coordinates file. So we can see that these are the sites that needs to be added to the coordinates file.</p>
-<p>Lets now inspect more the second list ie. the sites that are in the curated data but not in the site coordinates file</p>
+<p>The first table shows the list of sites which are present in the Sites_coordinates.csv file but absent in the curated data site lists. These are clearly misspelled sites and needs to be removed. All these site have the Health_Board as “(Empty)”.</p>
+<p>The second table shows the sites in curated data but not in Site coordinates file. So we can see that these are the sites that needs to be added to the coordinates file.</p>
+<p>Let’s now inspect more the second list ie. the sites that are in the curated data but not in the Sites_coordinates.csv file</p>
 <pre class="r"><code>glimpse(grep(&quot;-&quot;, unlist(sites_extra$Site), value = TRUE))</code></pre>
 <pre><code>##  chr [1:40] &quot;Allers - St Leonards&quot; &quot;Cumnock - Netherwood&quot; ...</code></pre>
 <pre class="r"><code>glimpse(grep(&quot;-&quot;, unlist(sites_extra$Site), value = TRUE,invert = T))</code></pre>
 <pre><code>##  chr [1:2] &quot;Dunoon&quot; &quot;Oban&quot;</code></pre>
 <p>The grep function in R with the option “value=TRUE” returns all the sites which has “-” in it. The second grep function here with “invert =T” added returns the sites without any “-” symbol in it</p>
-<p>The first list shows the sites which defines some subregions of already available sites in the Sites_Coordinates.csv file. For example, Allers is a site present in the coordinate file. So we can figure out that the same Latitude and longitude values can be used for these subregions. The sites “Oban” and “Dunoon” are not part of any other main site. So the coordinate information needs to be added.</p>
-<p>We need to do three things for curation of the coordinate file. 1. Remove the misspelled sites from renamed_site_data 2. Add the missing coordinate information for “Oban” and “Dunoon” 3. Add the missing coordinate details for missing sites with “-”</p>
+<p>The first list shows the sites which defines some sub-regions of already available sites in the Sites_coordinates.csvS file. For example, Allers is a site present in the coordinate file. So we can figure out that the same Latitude and longitude values can be used for these subregions. The sites “Oban” and “Dunoon” are not part of any other main site. So the coordinate information needs to be added.</p>
+<p>We need to do three things for curation of the coordinate file.</p>
+<ol style="list-style-type: decimal">
+<li>Remove the misspelled sites (having Health_Board = “(Empty)”) from renamed_site_data (Renamed Sites_coordinates.csv)</li>
+<li>Add the missing coordinate information for “Oban” and “Dunoon”</li>
+<li>Add the missing coordinate details for missing sites with “-”</li>
+</ol>
+<p>First we are removing the sites which are misspelled in the coordinate file We can use “subset” function from R base to make a subset of data where Health_Board not equal to “(Empty)” for removing misspelled sites</p>
 <pre class="r"><code>renamed_site_data &lt;- subset(renamed_site_data, renamed_site_data$Health_Board != &quot;(Empty)&quot;)
-sites_merged &lt;- merge(site_unique,select(renamed_site_data,Site,Latitude_dd,Longitude_dd), by = &#39;Site&#39;, all=TRUE)</code></pre>
-<p>First we are removing the sites which are misspelled in the coordinate file and then we merge them to the sites in the curated data file. Merge function adds all the sites which are missing in the coordinate file.</p>
+head(renamed_site_data)</code></pre>
+<pre><code>##         Health_Board        Site Latitude Longitude
+## 1 Ayrshire and Arran     Cumnock 620407.3  255829.2
+## 2 Ayrshire and Arran    Muirkirk 626364.3  267698.5
+## 3 Ayrshire and Arran New Cumnock 613986.3  262184.2
+## 4 Ayrshire and Arran     Fairlie 655930.4  220705.8
+## 5 Ayrshire and Arran       Largs 662381.9  219430.8
+## 6 Ayrshire and Arran  Meadowhead 635857.5  233866.8</code></pre>
+<p>We removed the misspelled sites from Sites_coordinates.csv file . Now we can merge them to the sites in the curated data file. Merge function adds all the sites which are missing in the coordinate file.</p>
+<pre class="r"><code>sites_merged &lt;- merge(site_unique,renamed_site_data, by = &#39;Site&#39;, all=TRUE )
+head(sites_merged)</code></pre>
+<pre><code>##                   Site Health_Board.x Health_Board.y Latitude Longitude
+## 1           Allanfearn       Highland       Highland 847455.4  271126.4
+## 2               Allers    Lanarkshire    Lanarkshire 656127.6  266192.0
+## 3 Allers - St Leonards    Lanarkshire           &lt;NA&gt;       NA        NA
+## 4                Alloa   Forth Valley   Forth Valley 691819.1  288662.0
+## 5               Alness       Highland       Highland 869016.4  267475.6
+## 6                 Alva   Forth Valley   Forth Valley 696609.2  287349.0</code></pre>
+<p>We can see there are two Health_Boards here. Health_Board.x contains all filled values because it is from curated data set. So we need only that from site_unique. In order to avoid Health_Board column from rename_site_data we can select specific columns. It can be done by simply selecting columns or using “select” function from “dplyr” library (commented). The option all=TRUE in merge function is for including all sites from both the data sets which other wise it will print only the matching records.</p>
+<pre class="r"><code>sites_merged &lt;- merge(site_unique,renamed_site_data[,2:4], by = &#39;Site&#39;,all=TRUE)
+#sites_merged &lt;- merge(site_unique,select(renamed_site_data,Site,Latitude_dd,Longitude_dd), by = &#39;Site&#39;, all=TRUE)
+head(sites_merged)</code></pre>
+<pre><code>##                   Site Health_Board Latitude Longitude
+## 1           Allanfearn     Highland 847455.4  271126.4
+## 2               Allers  Lanarkshire 656127.6  266192.0
+## 3 Allers - St Leonards  Lanarkshire       NA        NA
+## 4                Alloa Forth Valley 691819.1  288662.0
+## 5               Alness     Highland 869016.4  267475.6
+## 6                 Alva Forth Valley 696609.2  287349.0</code></pre>
 <p>Now we need to add the coordinates for “Oban” and “Dunoon”.</p>
 <pre class="r"><code>sites_merged[which(sites_merged$Site == &quot;Oban&quot;), ] &lt;-c(&quot;Oban&quot;,&quot;Highland&quot;,730176.21,185987.87)
 sites_merged[which(sites_merged$Site == &quot;Dunoon&quot;), ] &lt;- c(&quot;Dunoon&quot;,&quot;Highland&quot;,676972.15,217390.1) </code></pre>
-<p>We will now add the missing coordinate information for all the other sites</p>
+<p>We will now add the missing coordinate information for all the other sites. The data frame is sorted based on Site names in ascending order so that for example “Allers - St Leonards” will come after “Allers” which has the same coordinates.</p>
+<p>A for loop is used to iterate through each row and when the value of Latitude in each row is not equal to “NA”, the value is stored in a variable “y”. When the value of Latitude becomes “NA” the stored value in variable y is used to fill the missing Latitude. Same logic is applied for filling out the missing longitude values too.</p>
 <pre class="r"><code>sites_merged&lt;- sites_merged[order(sites_merged$Site),]
-for (i in 1:162) {ifelse (is.na(sites_merged$Latitude_dd[i]),sites_merged$Latitude_dd[i]&lt;-y, y &lt;- sites_merged$Latitude_dd[i])}
-for (i in 1:162) {ifelse (is.na(sites_merged$Longitude_dd[i]),sites_merged$Longitude_dd[i]&lt;-x, x &lt;- sites_merged$Longitude_dd[i])}
+for (i in 1:nrow(sites_merged)) {ifelse (is.na(sites_merged$Latitude[i]),sites_merged$Latitude[i]&lt;-y, y &lt;- sites_merged$Latitude[i])}
+for (i in 1:nrow(sites_merged)) {ifelse (is.na(sites_merged$Longitude[i]),sites_merged$Longitude[i]&lt;-x, x &lt;- sites_merged$Longitude[i])}
 head(sites_merged)</code></pre>
-<pre><code>##                   Site Health_Board Latitude_dd Longitude_dd
-## 1           Allanfearn     Highland   847455.37    271126.37
-## 2               Allers  Lanarkshire   656127.64    266191.99
-## 3 Allers - St Leonards  Lanarkshire   656127.64    266191.99
-## 4                Alloa Forth Valley   691819.05    288662.05
-## 5               Alness     Highland   869016.43    267475.62
-## 6                 Alva Forth Valley   696609.21       287349</code></pre>
-<p>The file is looking fine. Let’s rearrange the columns so that Health board is arranged as first column</p>
-<pre class="r"><code>sites_merged &lt;- select(sites_merged,Health_Board,Site,Latitude_dd,Longitude_dd)
+<pre><code>##                   Site Health_Board  Latitude Longitude
+## 1           Allanfearn     Highland 847455.37 271126.37
+## 2               Allers  Lanarkshire 656127.64 266191.99
+## 3 Allers - St Leonards  Lanarkshire 656127.64 266191.99
+## 4                Alloa Forth Valley 691819.05 288662.05
+## 5               Alness     Highland 869016.43 267475.62
+## 6                 Alva Forth Valley 696609.21    287349</code></pre>
+<p>The file is looking fine. Let’s rearrange the columns so that Health board is arranged as first column. Again we can arrange by column number or use “select” function to rearrange the columns</p>
+<pre class="r"><code>sites_merged &lt;- sites_merged[,c(2,1,3,4)]
+#sites_merged &lt;- select(sites_merged,Health_Board,Site,Latitude,Longitude)
 head(sites_merged)</code></pre>
-<pre><code>##   Health_Board                 Site Latitude_dd Longitude_dd
-## 1     Highland           Allanfearn   847455.37    271126.37
-## 2  Lanarkshire               Allers   656127.64    266191.99
-## 3  Lanarkshire Allers - St Leonards   656127.64    266191.99
-## 4 Forth Valley                Alloa   691819.05    288662.05
-## 5     Highland               Alness   869016.43    267475.62
-## 6 Forth Valley                 Alva   696609.21       287349</code></pre>
+<pre><code>##   Health_Board                 Site  Latitude Longitude
+## 1     Highland           Allanfearn 847455.37 271126.37
+## 2  Lanarkshire               Allers 656127.64 266191.99
+## 3  Lanarkshire Allers - St Leonards 656127.64 266191.99
+## 4 Forth Valley                Alloa 691819.05 288662.05
+## 5     Highland               Alness 869016.43 267475.62
+## 6 Forth Valley                 Alva 696609.21    287349</code></pre>
 <p>Let’s save our curated site coordinate data into a file.</p>
 <pre class="r"><code>if (!file.exists(&#39;../data&#39;)) {
   dir.create(file.path(&#39;..&#39;, &#39;data&#39;))  

@@ -15,12 +15,13 @@ We are going to fix some of the typical problems with real data.
 
 This and the following R-Markdown notebooks have been inspired by our real data curation work for the project about monitoring COVID virus levels in waste water around Scotland ([see project page](https://biordm.github.io/COVID-Wastewater-Scotland/)).
 
-Firstly, read our renamed data.
+Firstly, read our renamed data. Some of the  column names of renamed_data contains  character "-" . The check.names= F option in read.csv function will read the file as it is. Unless given, R will convert hyphen as dot.
 
 ## Inspecting DATA
 
 ```{r}
 library(dplyr)
+library(lubridate)
 renamed_data<- read.csv("../data/renamed_data.csv",check.names = F)
 glimpse(renamed_data)
 
@@ -62,10 +63,9 @@ We can see that there are 12, sites which are misspelled.
 
 Out of which 8 are with close but not identical names : "Carbarn","hatton - Fintry West","Invurie","Langhlm","Philiphill","Sheildhall","Stevenson", "Stevenson - Stevenston West" . Four of them differs by having a space after the name: "Allanfearn ","Fort William ","Galashiels ", "Perth " 
 
-We can also use another method for aggregation of counts ie. group_by function from the library dplyr
+We can also use another method for aggregation of counts ie. group_by function from the library "dplyr"
 
 ```{r}
-library (dplyr)
 site_count <- renamed_data %>% 
 group_by(Site) %>% 
 summarize("Count" = n())  
@@ -91,7 +91,6 @@ All other sites can be easily determined as misspelled. For example "Allanfearn 
 Let's do the filtering again keeping the genuine sites.
 
 ```{r}
-library (dplyr)
 filter(site_count, Count <5,Site != "Nigg - Aberdeen RI", Site != "Philipshill - Hairmyres Hospital")
 ```
 We finally go a list of sites which needs to be replaced with the correct names. Now next step is to replace the misspelled names with the corrected ones
@@ -126,7 +125,6 @@ We can see from the above table that only the first match is replaced as the cou
 We can see the dictionary approach is not helpful to replace all the matches. Let's try with recode function in dplyr library
 
 ```{r}
-library (dplyr)
 curated_data <- renamed_data
 curated_data$Site <-
   recode(curated_data$Site, "Allanfearn "= "Allanfearn", "Carbarn"="Carbarns" ,"Fort William "="Fort William","Galashiels "="Galashiels","hatton - Fintry West" = "Hatton - Fintry West", "Invurie"="Inverurie", "Langhlm"="Langholm","Perth "="Perth","Philiphill"="Philipshill","Sheildhall"="Shieldhall","Stevenson"="Stevenston","Stevenson - Stevenston West"="Stevenston - Stevenston West")
@@ -134,7 +132,6 @@ curated_data$Site <-
 Let's now find out the wrong sites if any exists 
 
 ```{r}
-library (dplyr)
 site_count <- curated_data %>% 
 group_by(Site) %>% 
 summarize("Count" = n())  
@@ -159,7 +156,6 @@ levels(as.factor(curated_data$N1_description))
 As we can clearly see from the above printed result, "neg","negative" and "Possitive" are the misspelled description. We can use the recode function again to replace all these.
 
 ```{r}
-library (dplyr)
 curated_data$N1_description <-recode(curated_data$N1_description,"negative" = "Negative", "neg" = "Negative", "Possitive"="Positive") 
 ```
 
@@ -181,10 +177,10 @@ Firstly, Lets check the current date format of our curated_data file
 ```{r}
 glimpse(curated_data$Date_collected)
 ```
-We can see that the date format is DD/MM/YYYY. So we can use dmy function from lubridate package to convert the dates to YYYY-MM-DD format. In other words dmy is a Lubridate's parse function which converts the dates arranged in DD/MM/YYYY format to iso format.
+We can see that the date format is DD/MM/YYYY. So we can use dmy function from lubridate package to convert the dates to YYYY-MM-DD format. In other words dmy is a lubridate's parse function which converts the dates arranged in DD/MM/YYYY format to iso format.
 
 ```{r}
-library(lubridate)
+
 curated_data$Date_analysed<- dmy(curated_data$Date_analysed) #Change the date format to YYYY-MM-DD
 curated_data$Date_collected<- dmy(curated_data$Date_collected) #Change the date format to YYYY-MM-DD
 glimpse(curated_data)
@@ -207,7 +203,7 @@ curated_data["Date_collected"][curated_data["Date_collected"] == "1899-12-31" ] 
 ```
 
 # Number
-Now we can check for the summary of  data value column to find if any values are negative 
+Now we can check for the summary of  data value column to find if any values are negative. The column names containing character "-" should be given in double quotes. Other wise R can't read that.
 ```{r}
 
 summary(select(curated_data,"N1_Reported_value-gc_per_L","N1_Repl_1-gc_per_L" ,"N1_Repl_2-gc_per_L","N1_Repl_3-gc_per_L" ,Calculated_mean,Standard_Deviation,"Flow-L_per_day","Ammonia-mg_per_L", pH_value ,"Modelled_flow-L_per_day" , Million_gene_copies_per_person_per_day))
@@ -226,7 +222,7 @@ glimpse(unique(select(curated_data,Health_Board,Site)))
 Here we can clearly see that many sites are having missing Health board information. For example the site: "Allers - St Leonards" is having Health board entered as "(Empty)" but the actual Health board is "Lanakshire" the same one as for "Allers". As the Sites are sorted alphabetically , now we can write a code to fill in the missing Health board information corresponding to each site.
 
 ```{r}
-for (i in 1:10316) {ifelse (curated_data$Health_Board[i] != "(Empty)", x <- curated_data$Health_Board[i],curated_data$Health_Board[i]<-x)}
+for (i in 1:nrow(curated_data)) {ifelse (curated_data$Health_Board[i] != "(Empty)", x <- curated_data$Health_Board[i],curated_data$Health_Board[i]<-x)}
 ```
 
 For each row, if the value of the Health board is there it is kept as such but if it is missing, it is populated from preceding non empty health board information. 
