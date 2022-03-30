@@ -177,7 +177,7 @@ pre code {
 <p>This and the following R-Markdown notebooks have been inspired by our real data curation work for the project about monitoring COVID virus levels in waste water around Scotland (<a href="https://biordm.github.io/COVID-Wastewater-Scotland/">see project page</a>).</p>
 <div id="reading-the-data-files-after-loading-necessary-libraries" class="section level2">
 <h2>Reading the data files after loading necessary libraries</h2>
-<p>Let’s first load the necessary libraries and read the file data_full.csv file. As we know that the data_full.csv contains column names having “-”, the option “check.names = F” is used to read it as it is. Otherwise the the hyphen is converted in to dot symbol while reading the file.</p>
+<p>Let’s first load the necessary libraries and read the file data_full.csv file. As we know that the data_full.csv contains column names having “-”, the option “check.names = F” is used to read it as it is. Otherwise the the hyphen is converted in to dot symbol while reading the file. Please note that the library “tidyverse” already have “dplyr” and “tidyr” packages included. So it’s not necessary to load these seperately.</p>
 <pre class="r"><code>library(&quot;tidyverse&quot;)</code></pre>
 <pre><code>## ── Attaching packages ─────────────────────────────────────── tidyverse 1.3.1 ──</code></pre>
 <pre><code>## ✓ ggplot2 3.3.5     ✓ purrr   0.3.4
@@ -238,49 +238,34 @@ pos_end = 88</code></pre>
 allData$Week = sprintf(&quot;%02d&quot;, isoweek(date)) # Format week as 2 digit for sorting
 allData$Month = sprintf(&quot;%02d&quot;, month(date)) # Format week as 2 digit for sorting
 allData$Year = year(date)
-head(allData)</code></pre>
-<pre><code>##   Health_Board       Site Latitude_dd Longitude_dd Population Population_Band
-## 1     Highland Allanfearn     57.4989    -4.152111      62058      10k - 100k
-## 2     Highland Allanfearn     57.4989    -4.152111      62058      10k - 100k
-## 3     Highland Allanfearn     57.4989    -4.152111      62058      10k - 100k
-## 4     Highland Allanfearn     57.4989    -4.152111      62058      10k - 100k
-## 5     Highland Allanfearn     57.4989    -4.152111      62058      10k - 100k
-## 6     Highland Allanfearn     57.4989    -4.152111      62058      10k - 100k
-##   Date_collected Date_analysed SW_sample_number N1_description
-## 1     2020-06-01          &lt;NA&gt;         13953443       Negative
-## 2     2020-06-02          &lt;NA&gt;         13953444       Negative
-## 3     2020-06-04          &lt;NA&gt;         13953445       Negative
-## 4     2020-06-08          &lt;NA&gt;         13953446       Negative
-## 5     2020-06-09          &lt;NA&gt;         13953447       Negative
-## 6     2020-06-10          &lt;NA&gt;         13953448       Negative
-##   N1_Reported_value-gc_per_L N1_Repl_1-gc_per_L N1_Repl_2-gc_per_L
-## 1                          0                 NA                 NA
-## 2                          0                 NA                 NA
-## 3                          0                 NA                 NA
-## 4                          0                 NA                 NA
-## 5                          0                 NA                 NA
-## 6                          0                945                 NA
-##   N1_Repl_3-gc_per_L Calculated_mean Standard_Deviation Flow-L_per_day
-## 1                 NA              NA                 NA       19353600
-## 2                 NA              NA                 NA       17020800
-## 3                 NA              NA                 NA       22204800
-## 4                 NA              NA                 NA       25228800
-## 5                 NA              NA                 NA       24537600
-## 6                 NA             945                 NA       27820800
-##   Ammonia-mg_per_L pH_value Modelled_flow-L_per_day
-## 1               NA       NA                      NA
-## 2               NA       NA                      NA
-## 3               NA       NA                      NA
-## 4               NA       NA                      NA
-## 5               NA       NA                      NA
-## 6               NA       NA                      NA
-##   Million_gene_copies_per_person_per_day Analysis_lab Week Month Year
-## 1                                      0         SEPA   23    06 2020
-## 2                                      0         SEPA   23    06 2020
-## 3                                      0         SEPA   23    06 2020
-## 4                                      0         SEPA   24    06 2020
-## 5                                      0         SEPA   24    06 2020
-## 6                                      0         SEPA   24    06 2020</code></pre>
+glimpse(allData)</code></pre>
+<pre><code>## Rows: 10,316
+## Columns: 25
+## $ Health_Board                           &lt;chr&gt; &quot;Highland&quot;, &quot;Highland&quot;, &quot;Highla…
+## $ Site                                   &lt;chr&gt; &quot;Allanfearn&quot;, &quot;Allanfearn&quot;, &quot;Al…
+## $ Latitude_dd                            &lt;dbl&gt; 57.4989, 57.4989, 57.4989, 57.4…
+## $ Longitude_dd                           &lt;dbl&gt; -4.152111, -4.152111, -4.152111…
+## $ Population                             &lt;int&gt; 62058, 62058, 62058, 62058, 620…
+## $ Population_Band                        &lt;chr&gt; &quot;10k - 100k&quot;, &quot;10k - 100k&quot;, &quot;10…
+## $ Date_collected                         &lt;chr&gt; &quot;2020-06-01&quot;, &quot;2020-06-02&quot;, &quot;20…
+## $ Date_analysed                          &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA,…
+## $ SW_sample_number                       &lt;int&gt; 13953443, 13953444, 13953445, 1…
+## $ N1_description                         &lt;chr&gt; &quot;Negative&quot;, &quot;Negative&quot;, &quot;Negati…
+## $ `N1_Reported_value-gc_per_L`           &lt;int&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 435,…
+## $ `N1_Repl_1-gc_per_L`                   &lt;dbl&gt; NA, NA, NA, NA, NA, 945.00, NA,…
+## $ `N1_Repl_2-gc_per_L`                   &lt;dbl&gt; NA, NA, NA, NA, NA, NA, NA, NA,…
+## $ `N1_Repl_3-gc_per_L`                   &lt;dbl&gt; NA, NA, NA, NA, NA, NA, NA, NA,…
+## $ Calculated_mean                        &lt;dbl&gt; NA, NA, NA, NA, NA, 945.00, NA,…
+## $ Standard_Deviation                     &lt;dbl&gt; NA, NA, NA, NA, NA, NA, NA, NA,…
+## $ `Flow-L_per_day`                       &lt;int&gt; 19353600, 17020800, 22204800, 2…
+## $ `Ammonia-mg_per_L`                     &lt;dbl&gt; NA, NA, NA, NA, NA, NA, NA, NA,…
+## $ pH_value                               &lt;dbl&gt; NA, NA, NA, NA, NA, NA, NA, NA,…
+## $ `Modelled_flow-L_per_day`              &lt;int&gt; NA, NA, NA, NA, NA, NA, NA, NA,…
+## $ Million_gene_copies_per_person_per_day &lt;dbl&gt; 0.00, 0.00, 0.00, 0.00, 0.00, 0…
+## $ Analysis_lab                           &lt;chr&gt; &quot;SEPA&quot;, &quot;SEPA&quot;, &quot;SEPA&quot;, &quot;SEPA&quot;,…
+## $ Week                                   &lt;chr&gt; &quot;23&quot;, &quot;23&quot;, &quot;23&quot;, &quot;24&quot;, &quot;24&quot;, &quot;…
+## $ Month                                  &lt;chr&gt; &quot;06&quot;, &quot;06&quot;, &quot;06&quot;, &quot;06&quot;, &quot;06&quot;, &quot;…
+## $ Year                                   &lt;dbl&gt; 2020, 2020, 2020, 2020, 2020, 2…</code></pre>
 <p>As we can see two additional columns have been added as “Week” and “Year”. Now let’s use “group_by” function from “dplyr” library to group by columns: Site, Week and Year and add one more column “mean_size” containing mean of “Million_gene_copies_per_person_per_day”. The data is grouped by Site, Week and Year and summarized based on mean of normalized data using pipe operator (%&gt;%) in “dplyr” package. Pipes let you take the output of one function and send it directly to the next, which is useful when you need to many things to the same data set. Pipes in R look like %&gt;% and are made available via the “magrittr” package installed as part of “dplyr”.</p>
 <p>In the below code we use the pipe to send the allData set first through group_by() function, to get Site, Week and year grouped, and then through mutate() to add a new column “mean_size” containing mean of normalized data grouped by Site, Week and Year. The mutate() function adds new variables and preserves existing ones. So we are using mutate() instead of summarize() so that we can easily get which month each week falls (to be used in annotation) When the data frame is being passed to the group_by() and mutate() functions through a pipe, we don’t need to include it as an argument to these functions anymore.</p>
 <pre class="r"><code>Meanaggregate&lt;-allData %&gt;% group_by(Site, Week,Year) %&gt;% mutate(mean_size = mean(Million_gene_copies_per_person_per_day, na.rm = TRUE)) 
@@ -349,135 +334,159 @@ Meanaggregate &lt;- select(Meanaggregate, Site,&quot;Year-Month-Week&quot;,mean_
 <p>Let’s convert the column “Site” to rownames for sorting and Sort the data ascending order based on the Column “Site”</p>
 <pre class="r"><code>Meanaggregate.wide &lt;- column_to_rownames(Meanaggregate.wide, var = &quot;Site&quot;) 
 Meanaggregate.wide &lt;- Meanaggregate.wide[,order(colnames(Meanaggregate.wide))] # Sort ascending by column names
-head(Meanaggregate.wide)</code></pre>
-<pre><code>##            2020-05-22 2020-06-23 2020-06-24 2020-06-25 2020-06-26 2020-06-27
-## Allanfearn         NA          0          0          0         NA          0
-## Allers             NA         NA         NA         NA         NA         NA
-## Alloa              NA         NA         NA         NA         NA         NA
-## Alness             NA         NA         NA         NA         NA         NA
-## Alva               NA         NA         NA         NA         NA         NA
-## Annan               0         NA         NA         NA         NA         NA
-##            2020-07-28 2020-07-29 2020-07-30 2020-07-31 2020-08-32 2020-08-33
-## Allanfearn         NA         NA         NA         NA       0.17       0.14
-## Allers             NA         NA         NA         NA         NA         NA
-## Alloa              NA         NA         NA         NA         NA         NA
-## Alness             NA         NA         NA         NA         NA         NA
-## Alva               NA         NA         NA         NA         NA         NA
-## Annan              NA         NA         NA         NA         NA         NA
-##            2020-08-34 2020-08-35 2020-08-36 2020-09-37 2020-09-38 2020-09-39
-## Allanfearn      0.245      0.135      1.225     0.9825      0.465     1.4075
-## Allers             NA         NA         NA         NA         NA         NA
-## Alloa              NA         NA         NA         NA         NA         NA
-## Alness             NA         NA         NA         NA         NA         NA
-## Alva               NA         NA         NA         NA         NA         NA
-## Annan           0.000      0.000      0.000     0.0000      0.000     0.2900
-##            2020-09-40 2020-10-41 2020-10-42 2020-10-43 2020-10-44 2020-11-45
-## Allanfearn      0.715       2.82     2.4475     8.0125    19.6025       4.86
-## Allers             NA         NA         NA         NA         NA         NA
-## Alloa              NA         NA         NA         NA         NA         NA
-## Alness             NA         NA         NA         NA         NA         NA
-## Alva               NA         NA         NA         NA         NA         NA
-## Annan           0.000       0.00     1.3400     1.2200     1.4200       4.48
-##            2020-11-46 2020-11-47 2020-11-48 2020-11-49 2020-12-50 2020-12-51
-## Allanfearn       1.70       3.94   5.926667     1.5925      1.135       2.54
-## Allers             NA         NA         NA         NA         NA         NA
-## Alloa              NA         NA         NA         NA         NA     117.32
-## Alness             NA         NA         NA         NA         NA         NA
-## Alva               NA         NA         NA         NA         NA         NA
-## Annan            2.46      11.36   0.520000     0.0000      0.000         NA
-##            2020-12-52 2020-12-53 2021-01-01 2021-01-02 2021-01-03 2021-01-04
-## Allanfearn         NA         NA   31.60333    46.2775    26.1825     19.105
-## Allers             NA         NA   53.99000    81.2800    55.6400     25.590
-## Alloa            3.26         NA   62.84333   171.9800    45.1400     31.185
-## Alness             NA         NA         NA         NA         NA         NA
-## Alva               NA         NA         NA         NA         NA         NA
-## Annan              NA         NA  584.50000   163.4200    19.4300     51.550
-##            2021-02-05 2021-02-06 2021-02-07 2021-02-08 2021-03-09 2021-03-10
-## Allanfearn   20.07667     26.215   20.61750   16.90000    4.43000   20.29000
-## Allers       17.52000      6.000   29.76000   27.01000    5.14000    2.57000
-## Alloa        43.72500     48.470   37.41333   40.09333   10.88333   19.15667
-## Alness             NA         NA         NA         NA         NA         NA
-## Alva               NA         NA  112.15500   90.30500   12.96500   25.35000
-## Annan        15.00000     17.310    0.76000    5.31000    0.00000   12.36000
-##            2021-03-11 2021-03-12 2021-03-13 2021-04-14 2021-04-15 2021-04-16
-## Allanfearn    6.81250   12.48750  0.6666667   3.993333    1.01000       2.86
-## Allers        1.65000    1.70000  5.4400000   1.750000    6.59000         NA
-## Alloa        19.29333   17.37667 18.5100000  19.750000   10.65667         NA
-## Alness             NA         NA         NA         NA         NA         NA
-## Alva          7.87000    6.80000  5.9100000   4.375000    2.22000         NA
-## Annan         5.47000    0.33000        NaN   0.000000    0.71000         NA
-##            2021-04-17 2021-05-18 2021-05-19 2021-05-20 2021-05-21 2021-05-22
-## Allanfearn   1.345000      7.805     4.3175       0.28      0.340      0.325
-## Allers       5.180000      3.810     7.4400       1.13      2.100      5.710
-## Alloa        5.233333     14.150    19.6450       8.92     14.500     23.235
-## Alness             NA         NA         NA         NA         NA         NA
-## Alva         2.070000      1.075     2.5750       4.16      5.355     95.000
-## Annan        0.620000      1.800     0.2700       1.32      0.000      3.930
-##            2021-06-23 2021-06-24 2021-06-25 2021-06-26 2021-07-27 2021-07-28
-## Allanfearn       0.96      3.055     9.6725     33.550    70.8525   37.99667
-## Allers           4.03      6.430    40.7200    135.110   120.5700   75.24000
-## Alloa           28.15     18.520    36.2700     38.745    52.0400  105.99000
-## Alness             NA         NA         NA         NA         NA         NA
-## Alva            54.83     42.620    40.5650     68.585    74.1550   42.93000
-## Annan             NaN     13.550     5.0800     18.780   411.0800         NA
-##            2021-07-29 2021-07-30 2021-08-31 2021-08-32 2021-08-33 2021-08-34
-## Allanfearn     28.960      66.65    17.3275   19.19333    30.3625    98.4875
-## Allers         47.410     101.46         NA         NA         NA         NA
-## Alloa          38.645         NA    41.7100   56.81500   110.7100   203.4150
-## Alness             NA         NA         NA         NA         NA         NA
-## Alva           85.840      37.87         NA         NA         NA         NA
-## Annan          31.830         NA    14.0000   41.80000    34.3600   203.3100
-##            2021-08-35 2021-09-36 2021-09-37 2021-09-38 2021-09-39 2021-10-40
-## Allanfearn   174.8633   212.1675   102.0333    77.1925      40.09      29.26
-## Allers       416.3100   481.8400   138.5700    63.6400      77.11         NA
-## Alloa        228.2700   286.6000   109.1750    57.5100     184.76      98.29
-## Alness             NA         NA         NA         NA         NA         NA
-## Alva         217.9950   472.2850   192.4450    72.5600     187.96     324.08
-## Annan         68.1700   309.8600   157.7800    24.1800      38.35      84.81
-##            2021-10-41 2021-10-42 2021-10-43 2021-11-44 2021-11-45 2021-11-46
-## Allanfearn    50.5225    33.4575    82.0125   33.46667   37.38667     47.605
-## Allers             NA    58.3800    38.3000   56.50000  171.41000    138.280
-## Alloa         76.6700    54.1650   196.0500   60.91500   81.79000     60.580
-## Alness             NA         NA         NA         NA         NA    757.205
-## Alva               NA   239.4850   365.1200  123.91500  122.58500    299.485
-## Annan         42.5200     6.0400    22.0300   35.74000   48.97000    130.190
-##            2021-11-47 2021-11-48 2021-12-49 2021-12-50 2021-12-51 2021-12-52
-## Allanfearn      65.03     86.435     43.975     38.600      79.25         NA
-## Allers         186.05         NA    154.110    164.190         NA     436.54
-## Alloa           64.12    111.330     76.870     48.040        NaN         NA
-## Alness         133.82        NaN     58.480     10.750         NA         NA
-## Alva           269.56         NA     61.260    140.105         NA         NA
-## Annan          153.69     78.960     38.450     24.990      17.43         NA
-##            2022-01-01 2022-01-02 2022-01-03 2022-01-04 2022-01-05 2022-02-06
-## Allanfearn     59.875     57.045     23.780      52.57     22.485      68.52
-## Allers            NaN         NA         NA         NA         NA     113.62
-## Alloa         155.885     63.155     33.800      20.77     59.505     409.09
-## Alness             NA         NA     56.420         NA        NaN         NA
-## Alva          197.130         NA    160.995         NA    635.260     236.26
-## Annan          35.410     53.350     92.510         NA     26.060      40.36</code></pre>
-<p>Now we will assign the column names of Meanaggregate.wide to Colnames. Then we will split the column names at “-” and put it in to three separate columns.<br />
-The “within” function evaluates an R expression in an environment constructed based on a data frame AND modifies the original data. The “do.call” constructs and executes a function call from a name or a function and a list of arguments to be passed to it. In the below code the Colnames are splitted by “-” and binded together by calling “rbind” function with in dataframe environment of Colnames</p>
+glimpse(Meanaggregate.wide)</code></pre>
+<pre><code>## Rows: 162
+## Columns: 90
+## $ `2020-05-22` &lt;dbl&gt; NA, NA, NA, NA, NA, 0, NA, NA, NA, NA, NA, NA, NA, NA, NA…
+## $ `2020-06-23` &lt;dbl&gt; 0, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA…
+## $ `2020-06-24` &lt;dbl&gt; 0, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA…
+## $ `2020-06-25` &lt;dbl&gt; 0, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA…
+## $ `2020-06-26` &lt;dbl&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N…
+## $ `2020-06-27` &lt;dbl&gt; 0, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA…
+## $ `2020-07-28` &lt;dbl&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N…
+## $ `2020-07-29` &lt;dbl&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N…
+## $ `2020-07-30` &lt;dbl&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N…
+## $ `2020-07-31` &lt;dbl&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N…
+## $ `2020-08-32` &lt;dbl&gt; 0.17, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,…
+## $ `2020-08-33` &lt;dbl&gt; 0.14, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,…
+## $ `2020-08-34` &lt;dbl&gt; 0.245, NA, NA, NA, NA, 0.000, NA, NA, NA, NA, NA, NA, NA,…
+## $ `2020-08-35` &lt;dbl&gt; 0.1350, NA, NA, NA, NA, 0.0000, NA, NA, NA, NA, NA, NA, N…
+## $ `2020-08-36` &lt;dbl&gt; 1.225000, NA, NA, NA, NA, 0.000000, NA, NA, NA, NA, NA, N…
+## $ `2020-09-37` &lt;dbl&gt; 0.9825, NA, NA, NA, NA, 0.0000, NA, NA, NA, NA, NA, NA, N…
+## $ `2020-09-38` &lt;dbl&gt; 0.4650, NA, NA, NA, NA, 0.0000, NA, NA, NA, NA, NA, NA, N…
+## $ `2020-09-39` &lt;dbl&gt; 1.4075, NA, NA, NA, NA, 0.2900, NA, NA, NA, NA, NA, NA, N…
+## $ `2020-09-40` &lt;dbl&gt; 0.715, NA, NA, NA, NA, 0.000, NA, NA, NA, NA, NA, NA, NA,…
+## $ `2020-10-41` &lt;dbl&gt; 2.82000, NA, NA, NA, NA, 0.00000, NA, NA, NA, NA, NA, NA,…
+## $ `2020-10-42` &lt;dbl&gt; 2.4475, NA, NA, NA, NA, 1.3400, NA, NA, NA, NA, NA, NA, N…
+## $ `2020-10-43` &lt;dbl&gt; 8.0125, NA, NA, NA, NA, 1.2200, NA, NA, NA, NA, NA, NA, N…
+## $ `2020-10-44` &lt;dbl&gt; 19.6025, NA, NA, NA, NA, 1.4200, NA, NA, NA, NA, NA, NA, …
+## $ `2020-11-45` &lt;dbl&gt; 4.86000, NA, NA, NA, NA, 4.48000, NA, NA, NA, NA, NA, NA,…
+## $ `2020-11-46` &lt;dbl&gt; 1.70, NA, NA, NA, NA, 2.46, NA, NA, NA, NA, NA, NA, NA, N…
+## $ `2020-11-47` &lt;dbl&gt; 3.94000, NA, NA, NA, NA, 11.36000, NA, NA, NA, NA, NA, NA…
+## $ `2020-11-48` &lt;dbl&gt; 5.926667, NA, NA, NA, NA, 0.520000, NA, NA, NA, NA, NA, N…
+## $ `2020-11-49` &lt;dbl&gt; 1.5925, NA, NA, NA, NA, 0.0000, NA, NA, NA, NA, NA, NA, N…
+## $ `2020-12-50` &lt;dbl&gt; 1.135, NA, NA, NA, NA, 0.000, NA, NA, NA, NA, NA, NA, NA,…
+## $ `2020-12-51` &lt;dbl&gt; 2.54, NA, 117.32, NA, NA, NA, NA, 3.56, NA, NA, NA, 39.29…
+## $ `2020-12-52` &lt;dbl&gt; NA, NA, 3.26, NA, NA, NA, NA, 27.13, NA, NA, NA, NA, NA, …
+## $ `2020-12-53` &lt;dbl&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N…
+## $ `2021-01-01` &lt;dbl&gt; 31.60333, 53.99000, 62.84333, NA, NA, 584.50000, NA, 6.35…
+## $ `2021-01-02` &lt;dbl&gt; 46.2775, 81.2800, 171.9800, NA, NA, 163.4200, NA, 13.4300…
+## $ `2021-01-03` &lt;dbl&gt; 26.1825, 55.6400, 45.1400, NA, NA, 19.4300, NA, 15.6700, …
+## $ `2021-01-04` &lt;dbl&gt; 19.105, 25.590, 31.185, NA, NA, 51.550, NA, 51.710, NA, N…
+## $ `2021-02-05` &lt;dbl&gt; 20.07667, 17.52000, 43.72500, NA, NA, 15.00000, NA, 16.63…
+## $ `2021-02-06` &lt;dbl&gt; 26.215, 6.000, 48.470, NA, NA, 17.310, NA, 34.900, NA, NA…
+## $ `2021-02-07` &lt;dbl&gt; 20.61750, 29.76000, 37.41333, NA, 112.15500, 0.76000, 14.…
+## $ `2021-02-08` &lt;dbl&gt; 16.90000, 27.01000, 40.09333, NA, 90.30500, 5.31000, 5.91…
+## $ `2021-03-09` &lt;dbl&gt; 4.43000, 5.14000, 10.88333, NA, 12.96500, 0.00000, 4.0950…
+## $ `2021-03-10` &lt;dbl&gt; 20.29000, 2.57000, 19.15667, NA, 25.35000, 12.36000, 23.8…
+## $ `2021-03-11` &lt;dbl&gt; 6.81250, 1.65000, 19.29333, NA, 7.87000, 5.47000, 8.78000…
+## $ `2021-03-12` &lt;dbl&gt; 12.48750, 1.70000, 17.37667, NA, 6.80000, 0.33000, 10.525…
+## $ `2021-03-13` &lt;dbl&gt; 0.6666667, 5.4400000, 18.5100000, NA, 5.9100000, NaN, 3.4…
+## $ `2021-04-14` &lt;dbl&gt; 3.993333, 1.750000, 19.750000, NA, 4.375000, 0.000000, 3.…
+## $ `2021-04-15` &lt;dbl&gt; 1.01000, 6.59000, 10.65667, NA, 2.22000, 0.71000, 1.49000…
+## $ `2021-04-16` &lt;dbl&gt; 2.86, NA, NA, NA, NA, NA, NA, NA, NA, NA, 0.00, NA, NA, 1…
+## $ `2021-04-17` &lt;dbl&gt; 1.345000, 5.180000, 5.233333, NA, 2.070000, 0.620000, 0.6…
+## $ `2021-05-18` &lt;dbl&gt; 7.805, 3.810, 14.150, NA, 1.075, 1.800, 0.695, 7.840, NA,…
+## $ `2021-05-19` &lt;dbl&gt; 4.3175, 7.4400, 19.6450, NA, 2.5750, 0.2700, 0.2100, 6.54…
+## $ `2021-05-20` &lt;dbl&gt; 0.280, 1.130, 8.920, NA, 4.160, 1.320, 0.165, 0.610, NA, …
+## $ `2021-05-21` &lt;dbl&gt; 0.3400000, 2.1000000, 14.5000000, NA, 5.3550000, 0.000000…
+## $ `2021-05-22` &lt;dbl&gt; 0.325, 5.710, 23.235, NA, 95.000, 3.930, 1.010, 9.165, NA…
+## $ `2021-06-23` &lt;dbl&gt; 0.960, 4.030, 28.150, NA, 54.830, NaN, 4.025, 4.815, 0.49…
+## $ `2021-06-24` &lt;dbl&gt; 3.055, 6.430, 18.520, NA, 42.620, 13.550, 2.950, 30.815, …
+## $ `2021-06-25` &lt;dbl&gt; 9.6725000, 40.7200000, 36.2700000, NA, 40.5650000, 5.0800…
+## $ `2021-06-26` &lt;dbl&gt; 33.550, 135.110, 38.745, NA, 68.585, 18.780, 11.375, 130.…
+## $ `2021-07-27` &lt;dbl&gt; 70.8525, 120.5700, 52.0400, NA, 74.1550, 411.0800, 43.670…
+## $ `2021-07-28` &lt;dbl&gt; 37.99667, 75.24000, 105.99000, NA, 42.93000, NA, 17.81000…
+## $ `2021-07-29` &lt;dbl&gt; 28.960, 47.410, 38.645, NA, 85.840, 31.830, 13.680, 93.91…
+## $ `2021-07-30` &lt;dbl&gt; 66.650, 101.460, NA, NA, 37.870, NA, 30.450, 212.135, 107…
+## $ `2021-08-31` &lt;dbl&gt; 17.3275, NA, 41.7100, NA, NA, 14.0000, NA, NA, 95.7150, 5…
+## $ `2021-08-32` &lt;dbl&gt; 19.19333, NA, 56.81500, NA, NA, 41.80000, NA, NA, NA, 19.…
+## $ `2021-08-33` &lt;dbl&gt; 30.3625, NA, 110.7100, NA, NA, 34.3600, NA, NA, 32.4900, …
+## $ `2021-08-34` &lt;dbl&gt; 98.4875, NA, 203.4150, NA, NA, 203.3100, NA, NA, 57.2400,…
+## $ `2021-08-35` &lt;dbl&gt; 174.8633, 416.3100, 228.2700, NA, 217.9950, 68.1700, 8.20…
+## $ `2021-09-36` &lt;dbl&gt; 212.16750, 481.84000, 286.60000, NA, 472.28500, 309.86000…
+## $ `2021-09-37` &lt;dbl&gt; 102.0333, 138.5700, 109.1750, NA, 192.4450, 157.7800, NaN…
+## $ `2021-09-38` &lt;dbl&gt; 77.1925, 63.6400, 57.5100, NA, 72.5600, 24.1800, 5.3100, …
+## $ `2021-09-39` &lt;dbl&gt; 40.090, 77.110, 184.760, NA, 187.960, 38.350, NaN, 173.53…
+## $ `2021-10-40` &lt;dbl&gt; 29.260, NA, 98.290, NA, 324.080, 84.810, 63.130, 49.660, …
+## $ `2021-10-41` &lt;dbl&gt; 50.5225, NA, 76.6700, NA, NA, 42.5200, NA, NA, 223.5150, …
+## $ `2021-10-42` &lt;dbl&gt; 33.4575, 58.3800, 54.1650, NA, 239.4850, 6.0400, 49.8150,…
+## $ `2021-10-43` &lt;dbl&gt; 82.0125, 38.3000, 196.0500, NA, 365.1200, 22.0300, 33.375…
+## $ `2021-11-44` &lt;dbl&gt; 33.46667, 56.50000, 60.91500, NA, 123.91500, 35.74000, 77…
+## $ `2021-11-45` &lt;dbl&gt; 37.38667, 171.41000, 81.79000, NA, 122.58500, 48.97000, 3…
+## $ `2021-11-46` &lt;dbl&gt; 47.605, 138.280, 60.580, 757.205, 299.485, 130.190, 56.56…
+## $ `2021-11-47` &lt;dbl&gt; 65.030, 186.050, 64.120, 133.820, 269.560, 153.690, 42.12…
+## $ `2021-11-48` &lt;dbl&gt; 86.435, NA, 111.330, NaN, NA, 78.960, 49.610, 52.420, 257…
+## $ `2021-12-49` &lt;dbl&gt; 43.975, 154.110, 76.870, 58.480, 61.260, 38.450, 35.310, …
+## $ `2021-12-50` &lt;dbl&gt; 38.600, 164.190, 48.040, 10.750, 140.105, 24.990, 11.740,…
+## $ `2021-12-51` &lt;dbl&gt; 79.25, NA, NaN, NA, NA, 17.43, NA, NA, NA, NaN, 139.27, 1…
+## $ `2021-12-52` &lt;dbl&gt; NA, 436.54, NA, NA, NA, NA, 24.17, NA, NA, NA, NA, NA, NA…
+## $ `2022-01-01` &lt;dbl&gt; 59.875, NaN, 155.885, NA, 197.130, 35.410, 77.065, 969.04…
+## $ `2022-01-02` &lt;dbl&gt; 57.0450, NA, 63.1550, NA, NA, 53.3500, 61.8600, NA, NaN, …
+## $ `2022-01-03` &lt;dbl&gt; 23.78000, NA, 33.80000, 56.42000, 160.99500, 92.51000, 50…
+## $ `2022-01-04` &lt;dbl&gt; 52.57000, NA, 20.77000, NA, NA, NA, 32.80000, 35.25000, 1…
+## $ `2022-01-05` &lt;dbl&gt; 22.485, NA, 59.505, NaN, 635.260, 26.060, 51.325, 210.535…
+## $ `2022-02-06` &lt;dbl&gt; 68.520, 113.620, 409.090, NA, 236.260, 40.360, 74.650, 16…</code></pre>
+<p>Now we will assign the column names of Meanaggregate.wide to Colnames. The “separate” function splits the “Colnames” to 3 columns at separator “-”</p>
 <pre class="r"><code>Colnames &lt;- colnames(Meanaggregate.wide)
-Colnames &lt;- as.data.frame(Colnames)
-Colnames1&lt;-within(Colnames,Colnames&lt;-data.frame(do.call(&#39;rbind&#39;, strsplit(as.character(Colnames), &#39;-&#39;)))) </code></pre>
-<p>We can convert the Second column(Colnames1<span class="math inline">\(Colnames\)</span>X2) to month abbrevation and paste it to the first column(Colnames1<span class="math inline">\(Colnames\)</span>X1) using “paste” function. Then we will take the unique dates for the annotation.</p>
-<pre class="r"><code>Dates_Range &lt;- paste(month.abb[as.integer(Colnames1$Colnames$X2)],as.integer(Colnames1$Colnames$X1),sep =  &quot;-&quot;) -&gt; Dates_Range # get the range of dates
-unique(Dates_Range) -&gt; Dates
+Colnames &lt;- as.data.frame(Colnames) 
+Colnames1&lt;-separate(data = Colnames, col = Colnames,into = c(&quot;Year&quot;,&quot;Month&quot;,&quot;Week&quot;),sep=&quot;-&quot;)
+head(Colnames1)</code></pre>
+<pre><code>##   Year Month Week
+## 1 2020    05   22
+## 2 2020    06   23
+## 3 2020    06   24
+## 4 2020    06   25
+## 5 2020    06   26
+## 6 2020    06   27</code></pre>
+<p>We can convert the Second column(Month) to month abbrevation and paste it to the first column(Year) using “paste” function. Then we will take the unique dates for the annotation.</p>
+<pre class="r"><code>Dates_Range &lt;- paste(month.abb[as.integer(Colnames1$Month)],as.integer(Colnames1$Year),sep =  &quot;-&quot;) -&gt; Dates_Range # get the range of dates
+Dates&lt;-unique(Dates_Range) 
 Dates</code></pre>
 <pre><code>##  [1] &quot;May-2020&quot; &quot;Jun-2020&quot; &quot;Jul-2020&quot; &quot;Aug-2020&quot; &quot;Sep-2020&quot; &quot;Oct-2020&quot;
 ##  [7] &quot;Nov-2020&quot; &quot;Dec-2020&quot; &quot;Jan-2021&quot; &quot;Feb-2021&quot; &quot;Mar-2021&quot; &quot;Apr-2021&quot;
 ## [13] &quot;May-2021&quot; &quot;Jun-2021&quot; &quot;Jul-2021&quot; &quot;Aug-2021&quot; &quot;Sep-2021&quot; &quot;Oct-2021&quot;
 ## [19] &quot;Nov-2021&quot; &quot;Dec-2021&quot; &quot;Jan-2022&quot; &quot;Feb-2022&quot;</code></pre>
-<p>Now Let’s find out the annotation for the full Dates range</p>
-<pre class="r"><code>c(1, head(cumsum(rle(Dates_Range)$lengths)+1, -1)) -&gt; anno 
+<p>Now Let’s find out the annotation for the full Dates range. To start with let’s use a function called “rle”. The “rle()” returns an object of class “rle” which is a list with components as lengths and values</p>
+<pre class="r"><code>rle(Dates_Range)</code></pre>
+<pre><code>## Run Length Encoding
+##   lengths: int [1:22] 1 5 4 5 4 4 5 4 4 4 ...
+##   values : chr [1:22] &quot;May-2020&quot; &quot;Jun-2020&quot; &quot;Jul-2020&quot; &quot;Aug-2020&quot; &quot;Sep-2020&quot; ...</code></pre>
+<p>We can clearly see from the above result that “May-2020” is repeating only one time, “Jun-2020” five times,“Jul-2020” four times and so on. Now we can take the lengths from the object of class “rle”.</p>
+<pre class="r"><code>rle(Dates_Range)$lengths</code></pre>
+<pre><code>##  [1] 1 5 4 5 4 4 5 4 4 4 5 4 5 4 4 5 4 4 5 4 5 1</code></pre>
+<p>As you can see it prints out only lengths of the repeating dates Now we can try to print the cumulative sum of these lengths. We can use a function “cumsum” to get the cumulative sums of lengths</p>
+<pre class="r"><code>cumsum(rle(Dates_Range)$lengths)</code></pre>
+<pre><code>##  [1]  1  6 10 15 19 23 28 32 36 40 45 49 54 58 62 67 71 75 80 84 89 90</code></pre>
+<p>When we look at the cumulative sums we get to know that “May-2020” repeats once and the “June-2020” starts from the second position repeats five times and ends at position 6. “July-2020” starts then from position 7. So we need to add 1 to this to get the correct positions</p>
+<pre class="r"><code>cumsum(rle(Dates_Range)$lengths)+1</code></pre>
+<pre><code>##  [1]  2  7 11 16 20 24 29 33 37 41 46 50 55 59 63 68 72 76 81 85 90 91</code></pre>
+<p>Okay, We are missing the position 1 here so we can add that.</p>
+<pre class="r"><code>c(1,cumsum(rle(Dates_Range)$lengths)+1)</code></pre>
+<pre><code>##  [1]  1  2  7 11 16 20 24 29 33 37 41 46 50 55 59 63 68 72 76 81 85 90 91</code></pre>
+<p>Now we got the correct positions . But we can see an extra position 91 is being added. So we need to remove that</p>
+<pre class="r"><code>anno &lt;- c(1, head(cumsum(rle(Dates_Range)$lengths)+1, -1)) 
 anno</code></pre>
 <pre><code>##  [1]  1  2  7 11 16 20 24 29 33 37 41 46 50 55 59 63 68 72 76 81 85 90</code></pre>
-<p>Lets now find the date range for the selected Dates that is from Dec-2020 to Feb-2022</p>
+<p>Now we got the correct annotation for the dates</p>
+<p>Let’s find the date range for the selected Dates that is from Dec-2020 to Feb-2022. The “which” function can be used to generate the index range.It shows some warnings because, as you can see the “Dec-2020” is repeating 4 times. But the first position is taken.</p>
 <pre class="r"><code>DR = as.data.frame(Dates_Range)
 selected_dates_range = DR[c(which(DR$Dates_Range==&quot;Dec-2020&quot;)):(which(DR$Dates_Range==&quot;Feb-2022&quot;)),] # extract the selected dates range</code></pre>
 <pre><code>## Warning in c(which(DR$Dates_Range == &quot;Dec-2020&quot;)):(which(DR$Dates_Range == :
 ## numerical expression has 4 elements: only the first used</code></pre>
-<pre class="r"><code>unique(selected_dates_range) -&gt; selected_dates
+<pre class="r"><code>selected_dates_range</code></pre>
+<pre><code>##  [1] &quot;Dec-2020&quot; &quot;Dec-2020&quot; &quot;Dec-2020&quot; &quot;Dec-2020&quot; &quot;Jan-2021&quot; &quot;Jan-2021&quot;
+##  [7] &quot;Jan-2021&quot; &quot;Jan-2021&quot; &quot;Feb-2021&quot; &quot;Feb-2021&quot; &quot;Feb-2021&quot; &quot;Feb-2021&quot;
+## [13] &quot;Mar-2021&quot; &quot;Mar-2021&quot; &quot;Mar-2021&quot; &quot;Mar-2021&quot; &quot;Mar-2021&quot; &quot;Apr-2021&quot;
+## [19] &quot;Apr-2021&quot; &quot;Apr-2021&quot; &quot;Apr-2021&quot; &quot;May-2021&quot; &quot;May-2021&quot; &quot;May-2021&quot;
+## [25] &quot;May-2021&quot; &quot;May-2021&quot; &quot;Jun-2021&quot; &quot;Jun-2021&quot; &quot;Jun-2021&quot; &quot;Jun-2021&quot;
+## [31] &quot;Jul-2021&quot; &quot;Jul-2021&quot; &quot;Jul-2021&quot; &quot;Jul-2021&quot; &quot;Aug-2021&quot; &quot;Aug-2021&quot;
+## [37] &quot;Aug-2021&quot; &quot;Aug-2021&quot; &quot;Aug-2021&quot; &quot;Sep-2021&quot; &quot;Sep-2021&quot; &quot;Sep-2021&quot;
+## [43] &quot;Sep-2021&quot; &quot;Oct-2021&quot; &quot;Oct-2021&quot; &quot;Oct-2021&quot; &quot;Oct-2021&quot; &quot;Nov-2021&quot;
+## [49] &quot;Nov-2021&quot; &quot;Nov-2021&quot; &quot;Nov-2021&quot; &quot;Nov-2021&quot; &quot;Dec-2021&quot; &quot;Dec-2021&quot;
+## [55] &quot;Dec-2021&quot; &quot;Dec-2021&quot; &quot;Jan-2022&quot; &quot;Jan-2022&quot; &quot;Jan-2022&quot; &quot;Jan-2022&quot;
+## [61] &quot;Jan-2022&quot; &quot;Feb-2022&quot;</code></pre>
+<pre class="r"><code>selected_dates&lt;-unique(selected_dates_range)
 selected_dates</code></pre>
 <pre><code>##  [1] &quot;Dec-2020&quot; &quot;Jan-2021&quot; &quot;Feb-2021&quot; &quot;Mar-2021&quot; &quot;Apr-2021&quot; &quot;May-2021&quot;
 ##  [7] &quot;Jun-2021&quot; &quot;Jul-2021&quot; &quot;Aug-2021&quot; &quot;Sep-2021&quot; &quot;Oct-2021&quot; &quot;Nov-2021&quot;
@@ -486,17 +495,17 @@ selected_dates</code></pre>
 <pre class="r"><code>c(1, head(cumsum(rle(selected_dates_range)$lengths)+1, -1)) -&gt; anno1 # find the annotation for selected date range
 anno1</code></pre>
 <pre><code>##  [1]  1  5  9 13 18 22 27 31 35 40 44 48 53 57 62</code></pre>
-<p>We need to extract the Data of interest from “Dec-2020” to “Feb-2022”</p>
-<pre class="r"><code>start_date_pattern = &quot;2020-12-50&quot; 
+<p>We need to extract the Data of interest from “Dec-2020” to “Feb-2022”. We can set the start date as = “2020-12-50”(first week in 2020 which starts with December). The “grepl” function is used to match the start date with column names. When it is “TRUE” , the subset of data stating from “Dec-2020” to “Feb-2020” is stored in to start_date_cols. We can then select the Site and columns from start_date_cols in to data_selected.</p>
+<pre class="r"><code>start_date_pattern = &quot;2020-12-50&quot;  # Week 50 is starting in moth December
 Meanaggregate.wide= as.data.frame(Meanaggregate.wide)
 Meanaggregate.wide &lt;- rownames_to_column(Meanaggregate.wide, var = &quot;Site&quot;) 
 start_date_cols = names(Meanaggregate.wide)
 start_date_cols = start_date_cols[grepl(start_date_pattern, start_date_cols)]
 data_selected = select(Meanaggregate.wide, Site | start_date_cols[1]:last_col())</code></pre>
-<p>Now we can select the sites which we are interested in</p>
+<p>Now we can select the sites which we are interested in.</p>
 <pre class="r"><code>selected_sites = c(&quot;Allanfearn&quot;,&quot;Helensburgh&quot;,&quot;Carbarns&quot;,&quot;Hamilton&quot;,&quot;Philipshill&quot;,&quot;Seafield&quot;,&quot;East Calder&quot;,&quot;Linlithgow&quot;,&quot;Shieldhall&quot;,&quot;Dalmuir&quot;,&quot;Paisley&quot;,&quot;Daldowie&quot;,&quot;Nigg&quot;,&quot;Peterhead&quot;,&quot;Kirkwall&quot;,&quot;Lerwick&quot;,&quot;Hatton&quot;,&quot;Forfar&quot;,&quot;Stirling&quot;,&quot;Falkirk&quot;,&quot;Alloa&quot;,&quot;Meadowhead&quot;,&quot;Stevenston&quot;,&quot;Linlithgow&quot;,&quot;Dunfermline&quot;,&quot;Levenmouth&quot;,&quot;Kirkcaldy&quot;,&quot;Troqueer&quot;,&quot;Lockerbie&quot;,&quot;Galashiels&quot;,&quot;Hawick&quot;,&quot;Stornoway&quot;)
 data_selected = filter(data_selected, data_selected$Site %in% selected_sites)</code></pre>
-<p>We need to now do a custom ordering based on Health board</p>
+<p>We need to now do a custom ordering based on Health board. The custom ordering can be done using function “arrange” from library “dplyr”</p>
 <pre class="r"><code>ordered_sites = c(&quot;Allanfearn&quot;,&quot;Helensburgh&quot;,&quot;Carbarns&quot;,&quot;Hamilton&quot;,&quot;Philipshill&quot;,&quot;Seafield&quot;,&quot;East Calder&quot;,&quot;Linlithgow&quot;,&quot;Shieldhall&quot;,&quot;Dalmuir&quot;,&quot;Paisley&quot;,&quot;Daldowie&quot;,&quot;Nigg&quot;,&quot;Peterhead&quot;,&quot;Kirkwall&quot;,&quot;Lerwick&quot;,&quot;Hatton&quot;,&quot;Forfar&quot;,&quot;Stirling&quot;,&quot;Falkirk&quot;,&quot;Alloa&quot;,&quot;Meadowhead&quot;,&quot;Stevenston&quot;,&quot;Dunfermline&quot;,&quot;Levenmouth&quot;,&quot;Kirkcaldy&quot;,&quot;Troqueer&quot;,&quot;Lockerbie&quot;,&quot;Galashiels&quot;,&quot;Hawick&quot;,&quot;Stornoway&quot;)
 data_selected = arrange(data_selected, factor(Site, levels = ordered_sites))
 data_selected&lt;-column_to_rownames(data_selected, var = &quot;Site&quot;) 
@@ -504,12 +513,13 @@ Meanaggregate.wide&lt;-column_to_rownames(Meanaggregate.wide, var = &quot;Site&q
 <p>We need to convert the data frames as matrix for passing in to the Heatmap function</p>
 <pre class="r"><code>data_selected = as.matrix(data_selected)
 data_full &lt;- as.matrix(Meanaggregate.wide)</code></pre>
-<p>Specify the bottom annotation for heatmap</p>
+<p>Specify the bottom annotation for Heatmap.</p>
 <pre class="r"><code>ha = HeatmapAnnotation(foo=anno_mark(at = anno, labels = Dates,  labels_gp = gpar(fontsize=3, fontface = &quot;bold&quot;),which = &quot;column&quot;, side = &quot;bottom&quot;))
 ha1 = HeatmapAnnotation(foo=anno_mark(at = anno1, labels = selected_dates,  labels_gp = gpar(fontsize=3, fontface = &quot;bold&quot;),which = &quot;column&quot;, side = &quot;bottom&quot;))</code></pre>
-<p>custom scale, positive start and end are used for rainbos range, non positive values are fixed to yellow</p>
+<p>We need to use circlize::colorRamp2() function to generate the color mapping function in Heatmap(). The two arguments for colorRamp2() is a vector of break values and a vector of corresponding colors. colorRamp2() linearly interpolates colors in every interval through LAB color space.</p>
 <pre class="r"><code>col_fun1 = colorRamp2(c(0,pos_start,pos_end), c(&quot;yellow&quot;, &quot;orange&quot;,&quot;blue&quot;)) </code></pre>
-<pre class="r"><code>fName = &quot;figure_prevalence_heatmap.jpeg&quot;
+<p>We will now generate the Heatmap for the normalized Virus levels binned on weekly basis. The function “Heatmap” is from the library ““ComplexHeatmap”. Reference: <a href="https://jokergoo.github.io/ComplexHeatmap-reference/book/" class="uri">https://jokergoo.github.io/ComplexHeatmap-reference/book/</a></p>
+<pre class="r"><code>fName = &quot;../out/figure_prevalence_heatmap.jpeg&quot;
 jpeg(filename= fName, width=1000, height = 700, units= &quot;px&quot;,res= 300) # Save as jpeg with width 1000 pixels, height = 700 pixels, and res = 300 dpi
 hm = Heatmap(data_selected, col = col_fun1, row_names_gp = gpar(fontsize = 3, fontfamily = &quot;Helvetica&quot;,fontface= &quot;bold&quot;) , 
         column_names_rot = 90, 
@@ -525,8 +535,8 @@ draw(hm)
 dev.off()</code></pre>
 <pre><code>## png 
 ##   2</code></pre>
-<p>Let’s now the heatmap for full data</p>
-<pre class="r"><code>fName = &quot;figure_prevalence_heatmap_all.jpeg&quot;
+<p>Let’s now generate the heatmap for full data</p>
+<pre class="r"><code>fName = &quot;../out/figure_prevalence_heatmap_all.jpeg&quot;
 col_fun1 = colorRamp2(c(0,pos_start,pos_end), c(&quot;yellow&quot;, &quot;orange&quot;,&quot;blue&quot;)) 
 jpeg(filename= fName, width=1000, height = 2500, units= &quot;px&quot;,res= 300) # Save as jpeg with width 1000 pixels, height = 700 pixels, and res = 300 dpi
 hm = Heatmap(data_full, col = col_fun1, row_names_gp = gpar(fontsize = 3, fontfamily = &quot;Helvetica&quot;,fontface= &quot;bold&quot;) , 
