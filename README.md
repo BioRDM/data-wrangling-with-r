@@ -12,32 +12,32 @@ The folder structure is (`out` and `data` are not under version control):
 - src - RMarkdown notebooks for data cleaning
 ```
 
-* [data-wrangling-01](src/data-wrangling-01.html) - renaming columns name to follow consisten naming convention and follow tidy tables recommendations
+* [data-wrangling-01](src/data-wrangling-01.Rmd) - renaming columns name to follow consisten naming convention and follow tidy tables recommendations
 
-* [data-wrangling-02](src/data-wrangling-02.html) - finding misspelled entries, checking data sanity (number of records per site, negative values etc), replace misspelled entries, changing data format to ISO, adding missing entries
+* [data-wrangling-02](src/data-wrangling-02.Rmd) - finding misspelled entries, checking data sanity (number of records per site, negative values etc), replace misspelled entries, changing data format to ISO, adding missing entries
 
-* [data-wrangling-03](src/data-wrangling-03.html) - preparing data from a source to join(prevalence with sites locations)
-
-
-* [data-wrangling-04](src/data-wrangling-04.html) - curating population data
+* [data-wrangling-03](src/data-wrangling-03.Rmd) - preparing data from a source to join(prevalence with sites locations)
 
 
-* [data-wrangling-05](src/data-wrangling-05.html) - joining the two sites tables (populatin and coordination) into one
+* [data-wrangling-04](src/data-wrangling-04.Rmd) - curating population data
 
 
-* [data-wrangling-06](src/data-wrangling-06.html) - merging the main covid data with coordingates and population (denormalization of the data)
+* [data-wrangling-05](src/data-wrangling-05.Rmd) - joining the two sites tables (populatin and coordination) into one
 
 
-* [data-wrangling-07](src/data-wrangling-07.html) - creation of timeseries data, *wide* table with a column for each date
+* [data-wrangling-06](src/data-wrangling-06.Rmd) - merging the main covid data with coordingates and population (denormalization of the data)
 
 
-* [data-wrangling-08](src/data-wrangling-08.html) - creation of aggregated timeseries data (per week number)
+* [data-wrangling-07](src/data-wrangling-07.Rmd) - creation of timeseries data, *wide* table with a column for each date
 
 
-* [data-wrangling-09](src/data-wrangling-09.html) - prepration of breakpoints for a color scale to be used with a heatmap
+* [data-wrangling-08](src/data-wrangling-08.Rmd) - creation of aggregated timeseries data (per week number)
 
 
-* [data-wrangling-10](src/data-wrangling-10.html) - generating heatmaps with virus leves per date
+* [data-wrangling-09](src/data-wrangling-09.Rmd) - prepration of breakpoints for a color scale to be used with a heatmap
+
+
+* [data-wrangling-10](src/data-wrangling-10.Rmd) - generating heatmaps with virus leves per date
 
 
 
