@@ -87,6 +87,7 @@ curated_data_wide<-column_to_rownames(curated_data_wide, var = "Site")
 curated_data_wide<-curated_data_wide[,order(colnames(curated_data_wide))]
 curated_norm_data_wide<-column_to_rownames(curated_norm_data_wide, var = "Site") 
 curated_norm_data_wide<-curated_norm_data_wide[,order(colnames(curated_norm_data_wide))]
+
 head(curated_data_wide)
 head(curated_norm_data_wide)
 ```
