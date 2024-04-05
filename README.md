@@ -4,9 +4,10 @@ Showcase notebooks for data cleaning with R inspired by our real data curation w
 
 The notebooks capture the typical workflows for data curation in biomedical data (probably also suitable any other descipline where data are entered manually into spreadsheets).
 
-The structure is:
+The folder structure is (`out` and `data` are not under version control):
 ```
-- data - generated cleaned data
+- data - curated input data
+- out - generated different forms of data 
 - raw_data - input data (COVID prevalence, sites coordinates and population)
 - src - RMarkdown notebooks for data cleaning
 ```
@@ -21,28 +22,24 @@ The structure is:
 * [data-wrangling-04](src/data-wrangling-04.html) - curating population data
 
 
-* [data-wrangling-0](src/data-wrangling-0.html) - 
+* [data-wrangling-05](src/data-wrangling-05.html) - joining the two sites tables (populatin and coordination) into one
 
 
-* [data-wrangling-0](src/data-wrangling-0.html) - 
+* [data-wrangling-06](src/data-wrangling-06.html) - merging the main covid data with coordingates and population (denormalization of the data)
 
 
-* [data-wrangling-0](src/data-wrangling-0.html) - 
+* [data-wrangling-07](src/data-wrangling-07.html) - creation of timeseries data, *wide* table with a column for each date
 
 
-* [data-wrangling-0](src/data-wrangling-0.html) - 
+* [data-wrangling-08](src/data-wrangling-08.html) - creation of aggregated timeseries data (per week number)
 
 
-* [data-wrangling-0](src/data-wrangling-0.html) - 
+* [data-wrangling-09](src/data-wrangling-09.html) - prepration of breakpoints for a color scale to be used with a heatmap
 
 
-* [data-wrangling-0](src/data-wrangling-0.html) - 
+* [data-wrangling-10](src/data-wrangling-10.html) - generating heatmaps with virus leves per date
 
 
-* [data-wrangling-0](src/data-wrangling-0.html) - 
-
-
-* [data-wrangling-0](src/data-wrangling-0.html) - 
 
 
 
