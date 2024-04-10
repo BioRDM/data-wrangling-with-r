@@ -1,4 +1,4 @@
-# Data wrangling with r
+# Data wrangling with R
 
 Showcase notebooks for data cleaning with R inspired by our real data curation work for the project about monitoring COVID virus levels in wastewater around Scotland [see project page](https://covid-ww-scotland.github.io/).
 
